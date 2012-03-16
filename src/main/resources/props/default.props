@@ -1,0 +1,3 @@
+fb.AppId=132919923500227
+fb.AppSecret=
+fb.CallbackUrl=http://localhost:8080/facebook/callback

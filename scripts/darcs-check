@@ -1,0 +1,12 @@
+#!/bin/bash
+
+ROOT_DIR=$(cd $(dirname $0)/.. > /dev/null; pwd)
+cd $ROOT_DIR
+
+source scripts/setup
+
+chmod 755 ./scripts/* || exit 1
+./scripts/syncheck-all || exit 1
+
+#echo "Compiling code and running tests ..."
+#$SBT update test || exit 1

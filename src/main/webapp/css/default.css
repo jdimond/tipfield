@@ -1,0 +1,29 @@
+body {
+  /*font-family: "lucida grande",tahoma,verdana,arial,sans-serif;*/
+}
+#games {
+  padding: 0px;
+  cell-padding: 5px;
+  text-align: center;
+  border: 5px;
+  width: 100%;
+}
+
+#games th {
+  background: black;
+  color: white;
+}
+
+#games .goalInput {
+  border: 1px solid #aaaaaa;
+  width: 30px;
+}
+
+#games .gameMatchup {
+  width: 400px;
+}
+
+#games .gameTeam {
+  display: inline-block;
+  width: 45%;
+}

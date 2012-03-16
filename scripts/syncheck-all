@@ -1,0 +1,22 @@
+#!/bin/bash
+
+ROOT_DIR=$(cd $(dirname $0)/.. > /dev/null; pwd)
+SYNCHECK=$ROOT_DIR/scripts/syncheck
+
+cd $ROOT_DIR
+
+echo "Checking syntax of code in $(pwd) ..."
+
+find . \
+  -type f \
+  -not -path "*/_darcs/*" -and \
+  -not -path "*/*-darcs-backup?/*" -and \
+    \( -name "*.scala" -or \
+       -name "*.java" -or \
+       -regex "\./scripts/[^/.]*/[^/.]*" \
+    \) -print0 | xargs -0 $SYNCHECK
+
+# handle xargs weird exit status
+if [ $? -ne 0 ] ; then
+    exit 1
+fi
