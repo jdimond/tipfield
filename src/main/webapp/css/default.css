@@ -27,3 +27,8 @@ body {
   display: inline-block;
   width: 45%;
 }
+
+#games img {
+  margin-left: 5px;
+  margin-right: 5px;
+}

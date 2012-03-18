@@ -26,26 +26,28 @@ class Boot extends Bootable {
 
     def date(s: String) = new Date()
 
-    Game.bulkDelete_!!()
     Result.bulkDelete_!!()
-    Team.bulkDelete_!!()
-    Tip.bulkDelete_!!()
 
-    val bayern = Team.create.name("FC Bayern München")
-    bayern.save
-    val dortmund = Team.create.name("BVB Dortmund 09")
-    dortmund.save
-    val bremen = Team.create.name("Werder Bremen")
-    bremen.save
-    val schalke = Team.create.name("FC Schalke 04")
-    schalke.save
-
-    val one = Game.create.teamHome(bayern).teamAway(dortmund).date(date("2012-06-13T13:30GMT+2:00"))
-    one.save()
-    Result.create.game(one).goalsHome(3).goalsAway(1).save()
-    Game.create.teamHome(bremen).teamAway(schalke).date(date("2012-06-13T13:30GMT+2:00")).save()
-    Game.create.teamHome(bayern).teamAway(schalke).date(date("2012-06-13T13:30GMT+2:00")).save()
-    Game.create.teamHome(dortmund).teamAway(bremen).date(date("2012-06-13T13:30GMT+2:00")).save()
+    Result.create.gameId(1).goalsHome(1).goalsAway(0).save
+    Result.create.gameId(2).goalsHome(0).goalsAway(2).save
+    Result.create.gameId(3).goalsHome(2).goalsAway(3).save
+    Result.create.gameId(4).goalsHome(4).goalsAway(1).save
+    Result.create.gameId(5).goalsHome(0).goalsAway(0).save
+    Result.create.gameId(6).goalsHome(2).goalsAway(1).save
+    Result.create.gameId(7).goalsHome(0).goalsAway(0).save
+    Result.create.gameId(8).goalsHome(3).goalsAway(0).save
+    Result.create.gameId(9).goalsHome(1).goalsAway(1).save
+    Result.create.gameId(10).goalsHome(1).goalsAway(3).save
+    Result.create.gameId(11).goalsHome(1).goalsAway(2).save
+    Result.create.gameId(12).goalsHome(1).goalsAway(2).save
+    Result.create.gameId(13).goalsHome(3).goalsAway(3).save
+    Result.create.gameId(14).goalsHome(0).goalsAway(0).save
+    Result.create.gameId(15).goalsHome(3).goalsAway(1).save
+    Result.create.gameId(16).goalsHome(1).goalsAway(1).save
+    Result.create.gameId(17).goalsHome(0).goalsAway(0).save
+    Result.create.gameId(18).goalsHome(2).goalsAway(3).save
+    Result.create.gameId(19).goalsHome(1).goalsAway(4).save
+    Result.create.gameId(20).goalsHome(4).goalsAway(2).save
   }
   def boot {
     // where to search snippet
@@ -58,7 +60,7 @@ class Boot extends Bootable {
       //Menu.i("Home") / "index", // the simple way to declare a menu
       Menu(Loc("Home", List("index") -> false, "Home", ifLoggedIn)),
       Menu(Loc("Spielplan", List("schedule") -> false, "Schedule", ifLoggedIn)),
-      Menu(Loc("Ranking", List("ranking") -> false, "Ranking", ifLoggedIn)),
+      Menu(Loc("Standings", List("standings") -> false, "Standings")),
       Menu.i("Login") / "login" >> Hidden
     )
 
@@ -94,8 +96,10 @@ class Boot extends Bootable {
                                         Props get "db.url" openOr "jdbc:postgresql://localhost/tippspiel",
                                         Empty, Empty)
     DB.defineConnectionManager(DefaultConnectionIdentifier, dbVendor)
-    Schemifier.schemify(true, Schemifier.infoF _, Game, Result, Team, Tip, User)
+    Schemifier.schemify(true, Schemifier.infoF _, Result, Tip, User)
 
     setupDb()
+
+    GameData.init()
   }
 }

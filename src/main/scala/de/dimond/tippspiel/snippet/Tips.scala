@@ -56,7 +56,7 @@ object TipForm {
       val ids = Set("gameAjaxLoader",
                     "saveGameTip")
       if (ids.contains(s)) {
-        s + game.id.is
+        s + game.id
       } else {
         s
       }
@@ -70,7 +70,7 @@ object TipForm {
 
     def process(): JsCmd = {
       if (guessHome >= 0 && guessAway >= 0) {
-        val tip = Tip findByGame(user, game) openOr Tip.create.user(user).game(game)
+        val tip = Tip findByGame(user, game) openOr Tip.create.user(user).gameId(game.id)
         tip.goalsHome(guessHome)
         tip.goalsAway(guessAway)
         if (tip.save) {
@@ -100,10 +100,17 @@ object TipForm {
 }
 
 class GameListing {
+  import scala.xml.Text
+  def teamHtml(ref: TeamReference) = ref.team match {
+    case Left(str) => Text(str)
+    case Right(team) => {
+      Seq(<img src={"/images/flags/" + team.emblemUrl} />, Text(team.name))
+    }
+  }
   def list = "#games" #> { ".game" #> Game.all.map(game =>
-    "#gameTime *" #> Util.formatTime(game.date.asJoda) &
-    "#gameTeamHome *" #> game.teamHome.obj.map(_.name.is).openOr("") &
-    "#gameTeamAway *" #> game.teamAway.obj.map(_.name.is).openOr("") &
+    "#gameTime *" #> Util.formatTime(game.date) &
+    "#gameTeamHome *" #> teamHtml(game.teamHome).reverse &
+    "#gameTeamAway *" #> teamHtml(game.teamAway) &
     "#gameResult *" #> Result.goalsForGame(game) &
     "#gameTip" #> TipForm.render(game)
   )}
