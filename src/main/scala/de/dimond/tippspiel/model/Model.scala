@@ -3,6 +3,7 @@ package de.dimond.tippspiel.model
 import org.joda.time.DateTime
 
 import net.liftweb.mapper._
+import net.liftweb.common._
 
 case class Standing(team: Team, gamesPlayed: Int, won: Int, drawn: Int, lost: Int, goalsScored: Int,
                     goalsReceived: Int, points: Int) {
@@ -138,6 +139,8 @@ class Result extends LongKeyedMapper[Result] with IdPK {
 
 object User extends User with MetaMegaProtoUser[User] {
   def findByFbId(id: String) = find(By(User.facebookId, id))
+  onLogIn = List(ExtendedSession.userDidLogin(_))
+  onLogOut = List(ExtendedSession.userDidLogout(_))
 }
 
 class User extends MegaProtoUser[User] {
@@ -157,4 +160,18 @@ class User extends MegaProtoUser[User] {
   object points extends MappedInt(this)
 
   def getFbProfilePictureUrl = "https://graph.facebook.com/%s/picture".format(facebookId)
+}
+
+object ExtendedSession extends ExtendedSession with MetaProtoExtendedSession[ExtendedSession] with Logger {
+  override def dbTableName = "ext_session"
+
+  def logUserIdIn(uid: String): Unit = User.logUserIdIn(uid)
+
+  def recoverUserId: Box[String] = User.currentUserId
+
+  type UserType = User
+}
+
+class ExtendedSession extends ProtoExtendedSession[ExtendedSession] {
+  def getSingleton = ExtendedSession
 }

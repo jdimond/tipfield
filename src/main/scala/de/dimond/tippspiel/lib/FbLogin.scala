@@ -106,8 +106,7 @@ object FbLogin {
         User.logUserIn(user)
       }
 
-      Full(RedirectResponse("/"))
-      //error(Printer.pretty(JsonAST.render(json)))
+      S.redirectTo("/")
     } else {
       error("State doesn't match. You are probably a victim of CSRF" + sessionCode + "/" + requestCode)
     }

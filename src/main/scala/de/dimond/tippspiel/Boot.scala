@@ -69,10 +69,22 @@ class Boot extends Bootable {
     LiftRules.setSiteMap(SiteMap(entries:_*))
 
     LiftRules.dispatch.append {
-      case req@Req(List("logout"), _, _) => () => { User.logout; Full(RedirectResponse("/")) }
+      case req@Req(List("logout"), _, _) => () => { User.logout; S.redirectTo("/") }
       case req@Req(List("facebook", "authorize"), _, _) => () => FbLogin.authorize(req)
       case req@Req(List("facebook", "callback"), _, _) => () => FbLogin.callback(req)
     }
+
+    // Don't serve static content
+    LiftRules.liftRequest.append {
+      case Req("classpath" :: _, _, _) => true
+      case Req("ajax_request" :: _, _, _) => true
+      case Req("favicon" :: Nil, "ico", GetRequest) => false
+      case Req(_, "css", GetRequest) => false
+      case Req(_, "js", GetRequest) => false
+    }
+
+    // Make sure ExtendedSession is used
+    LiftRules.earlyInStateful.append(ExtendedSession.testCookieEarlyInStateful)
 
     // Use jQuery 1.4
     LiftRules.jsArtifacts = net.liftweb.http.js.jquery.JQuery14Artifacts
@@ -96,7 +108,7 @@ class Boot extends Bootable {
                                         Props get "db.url" openOr "jdbc:postgresql://localhost/tippspiel",
                                         Empty, Empty)
     DB.defineConnectionManager(DefaultConnectionIdentifier, dbVendor)
-    Schemifier.schemify(true, Schemifier.infoF _, Result, Tip, User)
+    Schemifier.schemify(true, Schemifier.infoF _, Result, Tip, User, ExtendedSession)
 
     setupDb()
 
