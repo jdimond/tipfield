@@ -48,6 +48,14 @@ class Boot extends Bootable {
     Result.create.gameId(18).goalsHome(2).goalsAway(3).save
     Result.create.gameId(19).goalsHome(1).goalsAway(4).save
     Result.create.gameId(20).goalsHome(4).goalsAway(2).save
+    Result.create.gameId(21).goalsHome(3).goalsAway(4).save
+    Result.create.gameId(22).goalsHome(1).goalsAway(0).save
+    Result.create.gameId(23).goalsHome(1).goalsAway(0).save
+    Result.create.gameId(24).goalsHome(1).goalsAway(0).save
+
+    Result.create.gameId(25).goalsHome(4).goalsAway(1).save
+    Result.create.gameId(26).goalsHome(2).goalsAway(0).save
+    Result.create.gameId(27).goalsHome(1).goalsAway(0).save
   }
   def boot {
     // where to search snippet

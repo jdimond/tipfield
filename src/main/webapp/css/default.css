@@ -32,3 +32,9 @@ body {
   margin-left: 5px;
   margin-right: 5px;
 }
+#standings {
+  width: 100%;
+}
+#standings .number {
+  text-align: right;
+}

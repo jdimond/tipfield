@@ -4,28 +4,28 @@ import org.joda.time.{DateTime, DateTimeZone}
 
 object GameData {
   // Group A
-  val poland = Team("Poland", "poland.png")
-  val greece = Team("Greece", "greece.png")
-  val russia = Team("Russia", "russia.png")
-  val czechRepublic = Team("Czech Republic", "czech_republic.png")
+  val poland = Team("Poland", "poland.png", 23806)
+  val greece = Team("Greece", "greece.png", 29995)
+  val russia = Team("Russia", "russia.png", 30671)
+  val czechRepublic = Team("Czech Republic", "czech_republic.png", 26456)
 
   // Group B
-  val netherlands = Team("Netherlands", "netherlands.png")
-  val denmark = Team("Denmark", "denmark.png")
-  val germany = Team("Germany", "germany.png")
-  val portugal = Team("Portugal", "portugal.png")
+  val netherlands = Team("Netherlands", "netherlands.png", 39660)
+  val denmark = Team("Denmark", "denmark.png", 28105)
+  val germany = Team("Germany", "germany.png", 37966)
+  val portugal = Team("Portugal", "portugal.png", 29677)
 
   // Group C
-  val spain = Team("Spain", "spain.png")
-  val italy = Team("Italy", "italy.png")
-  val ireland = Team("Ireland", "ireland.png")
-  val croatia = Team("Croatia", "croatia.png")
+  val spain = Team("Spain", "spain.png", 40016)
+  val italy = Team("Italy", "italy.png", 32697)
+  val ireland = Team("Ireland", "ireland.png", 25743)
+  val croatia = Team("Croatia", "croatia.png", 31523)
 
   // Group D
-  val ukraine = Team("Ukraine", "ukraine.png")
-  val sweden = Team("Sweden", "sweden.png")
-  val france = Team("France", "france.png")
-  val england = Team("England", "england.png")
+  val ukraine = Team("Ukraine", "ukraine.png", 28029)
+  val sweden = Team("Sweden", "sweden.png", 29235)
+  val france = Team("France", "france.png", 28848)
+  val england = Team("England", "england.png", 33063)
 
 
   val utc3 = DateTimeZone.forOffsetHours(3)
