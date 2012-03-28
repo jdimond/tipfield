@@ -38,3 +38,31 @@ body {
 #standings .number {
   text-align: right;
 }
+
+.matchday_selection {
+  width: 100%;
+  padding-bottom: 5px;
+}
+
+.matchday_selection li {
+  list-style-type: none;
+  display: inline-block;
+  width: 33%
+}
+
+#next_matchday {
+  text-align: right;
+  float: right;
+  position: relative;
+  top: 7px;
+}
+
+#matchday_select {
+  text-align: center;
+}
+
+#prev_matchday {
+  text-align: left;
+  position: relative;
+  top: 7px;
+}

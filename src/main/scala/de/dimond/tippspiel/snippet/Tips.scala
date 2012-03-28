@@ -76,7 +76,7 @@ object TipForm {
   }
 }
 
-class GameListing {
+object GameSnippet {
   import scala.xml.Text
   def teamHtml(ref: TeamReference) = ref.team match {
     case Left(str) => Text(str)
@@ -84,11 +84,15 @@ class GameListing {
       Seq(<img src={"/images/flags/" + team.emblemUrl} />, Text(team.name))
     }
   }
-  def list = "#games" #> { ".game" #> Game.all.map(game =>
+  def html(game: Game) = {
     "#gameTime *" #> DateHelpers.formatTime(game.date) &
     "#gameTeamHome *" #> teamHtml(game.teamHome).reverse &
     "#gameTeamAway *" #> teamHtml(game.teamAway) &
     "#gameResult *" #> Result.goalsForGame(game) &
     "#gameTip" #> TipForm.render(game)
-  )}
+  }
+}
+
+class GameListing {
+  def list = "#games" #> { ".game" #> Game.all.map(GameSnippet.html(_)) }
 }

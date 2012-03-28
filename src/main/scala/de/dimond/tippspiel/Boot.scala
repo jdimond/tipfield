@@ -91,6 +91,11 @@ class Boot extends Bootable {
       case Req(_, "js", GetRequest) => false
     }
 
+    LiftRules.statelessRewrite.append {
+      case RewriteRequest(ParsePath(List("schedule", matchday),_,_,_),_,_) =>
+         RewriteResponse("schedule" :: Nil, Map("matchday" -> matchday))
+    }
+
     // Make sure ExtendedSession is used
     LiftRules.earlyInStateful.append(ExtendedSession.testCookieEarlyInStateful)
 

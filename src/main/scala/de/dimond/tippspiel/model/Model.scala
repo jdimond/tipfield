@@ -118,7 +118,21 @@ case class Group(name: String, teams: Seq[Team], games: Seq[Game]) {
   }
 }
 
-case class Matchday(name: String, games: Seq[Game])
+object MatchDay {
+  private var _matchDays: Map[String, MatchDay] = Map()
+
+  def init(matchDays: Seq[MatchDay]) = _matchDays = _matchDays ++ (for (md <- matchDays) yield (md.id, md))
+
+  def forId(id: String) = _matchDays.getOrElse(id,
+                                               throw new IllegalArgumentException("Group not available"))
+
+  def all = _matchDays.values.toList.sortBy(_.firstDate)
+}
+
+case class MatchDay(id: String, name: String, games: Seq[Game]) {
+  lazy val firstDate = games.map(_.date).min
+  lazy val lastDate = games.map(_.date).max
+}
 
 sealed trait TeamReference {
   def team: Either[String, Team]

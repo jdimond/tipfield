@@ -96,12 +96,17 @@ object GameData {
   val game31 = Game(31, GameWinner(game29), GameWinner(game30),
                     new DateTime(2012, 7, 1, 21, 45, utc3), kiev)
 
-  val matchDay1 = Matchday("Matchday 1", Seq(game01, game02, game03, game04, game05, game06, game07, game08))
-  val matchDay2 = Matchday("Matchday 2", Seq(game09, game10, game11, game12, game13, game14, game15, game16))
-  val matchDay3 = Matchday("Matchday 3", Seq(game17, game18, game19, game20, game21, game22, game23, game24))
-  val matchDayQuarter = Matchday("Quarter-finals", Seq(game25, game26, game27, game28))
-  val matchDaySemi = Matchday("Semi-finals", Seq(game30, game31))
-  val matchDayFinal = Matchday("Final", Seq(game31))
+  val matchDay1 = MatchDay("matchday1", "Matchday 1",
+                           Seq(game01, game02, game03, game04, game05, game06, game07, game08))
+  val matchDay2 = MatchDay("matchday2", "Matchday 2",
+                           Seq(game09, game10, game11, game12, game13, game14, game15, game16))
+  val matchDay3 = MatchDay("matchday3", "Matchday 3",
+                           Seq(game17, game18, game19, game20, game21, game22, game23, game24))
+  val quarterFinals = MatchDay("quarter-finals", "Quarter-finals", Seq(game25, game26, game27, game28))
+  val semiFinals = MatchDay("semi-finals", "Semi-finals", Seq(game30, game31))
+  val matchDayFinal = MatchDay("final", "Final", Seq(game31))
+
+  MatchDay.init(Seq(matchDay1, matchDay2, matchDay3, quarterFinals, semiFinals, matchDayFinal))
 
   def init() = ()
 }
