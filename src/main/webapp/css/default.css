@@ -16,7 +16,11 @@ body {
 
 #games .goalInput {
   border: 1px solid #aaaaaa;
-  width: 30px;
+  width: 20px;
+}
+
+#games .final_tip {
+  background: #eee;
 }
 
 #games .gameMatchup {

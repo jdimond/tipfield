@@ -202,6 +202,8 @@ class Tip extends LongKeyedMapper[Tip] with IdPK {
   object gameId extends MappedLong(this)
   object goalsHome extends MappedInt(this)
   object goalsAway extends MappedInt(this)
+  object points extends MappedInt(this)
+  object submissionTime extends MappedDateTime(this)
 }
 
 object Result extends Result with LongKeyedMetaMapper[Result] {

@@ -123,8 +123,8 @@ class Boot extends Bootable {
     DB.defineConnectionManager(DefaultConnectionIdentifier, dbVendor)
     Schemifier.schemify(true, Schemifier.infoF _, Result, Tip, User, ExtendedSession)
 
-    setupDb()
+    GameData.init(Props.testMode || Props.devMode)
 
-    GameData.init()
+    setupDb()
   }
 }
