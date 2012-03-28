@@ -16,30 +16,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
 import de.dimond.tippspiel.model._
-
-
-object Util {
-  import scala.xml.transform._
-  import scala.xml._
-  val format = DateTimeFormat.forPattern("dd.MM.yy HH:mm");
-  implicit def date2Joda(date: Date): DateTime = new DateTime(date)
-  def formatTime(dateTime: DateTime) = format.print(dateTime)
-  def uniquifyIds(ids: String => String)(nodeSeq: NodeSeq): NodeSeq = {
-    val rr = new RewriteRule {
-      override def transform(n: Node): Seq[Node] = n match {
-        case elem: Elem => {
-          elem.attribute("id") match {
-            case Some(Seq(Text(x))) => elem % new UnprefixedAttribute("id", Text(ids(x)), Null) toSeq
-            case None => elem
-          }
-        }
-        case other => other
-      }
-    }
-    val transformer = new RuleTransformer(rr)
-    nodeSeq map { transformer(_) }
-  }
-}
+import de.dimond.tippspiel.util._
 
 object TipForm {
   import scala.xml.Text
@@ -95,7 +72,7 @@ object TipForm {
     }
     val showLoader = JqJsCmds.Hide(mkId("saveGameTip")) & JqJsCmds.Show(mkId("gameAjaxLoader"))
     val hideLoader = JqJsCmds.Hide(mkId("gameAjaxLoader"))
-    "form" #> {body => Util.uniquifyIds(mkId)(SHtml.ajaxForm(bodyTrans(body), showLoader))}
+    "form" #> {body => XmlHelpers.uniquifyIds(mkId)(SHtml.ajaxForm(bodyTrans(body), showLoader))}
   }
 }
 
@@ -108,7 +85,7 @@ class GameListing {
     }
   }
   def list = "#games" #> { ".game" #> Game.all.map(game =>
-    "#gameTime *" #> Util.formatTime(game.date) &
+    "#gameTime *" #> DateHelpers.formatTime(game.date) &
     "#gameTeamHome *" #> teamHtml(game.teamHome).reverse &
     "#gameTeamAway *" #> teamHtml(game.teamAway) &
     "#gameResult *" #> Result.goalsForGame(game) &

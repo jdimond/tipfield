@@ -1,6 +1,7 @@
 package de.dimond.tippspiel.model
 
-import org.joda.time.DateTime
+import org.scala_tools.time.Imports._
+import de.dimond.tippspiel.util.DateHelpers.Implicits._
 
 import net.liftweb.mapper._
 import net.liftweb.common._

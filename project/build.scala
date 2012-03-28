@@ -38,6 +38,7 @@ object LiftProjectBuild extends Build {
         "ch.qos.logback" % "logback-classic" % "1.0.0" % "compile",
         "org.scalatest" %% "scalatest" % "1.6.1" % "test",
         "junit" % "junit" % "4.10" % "test",
+        "org.scala-tools.time" % "time_2.9.1" % "0.5",
         "joda-time" % "joda-time" % "2.0",
         "org.joda" % "joda-convert" % "1.1",
         "postgresql" % "postgresql" % "8.4-702.jdbc4"

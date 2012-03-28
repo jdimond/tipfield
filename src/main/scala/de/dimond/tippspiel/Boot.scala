@@ -1,7 +1,7 @@
 package de.dimond.tippspiel
 
 import net.liftweb._
-import util._
+import net.liftweb.util._
 import Helpers._
 
 import common._
