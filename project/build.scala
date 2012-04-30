@@ -26,7 +26,10 @@ object LiftProjectBuild extends Build {
     name := "tippspiel",
     resolvers ++= Seq(
       "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases",
-      "Java.net Maven2 Repository" at "http://download.java.net/maven/2/"),
+      "Java.net Maven2 Repository" at "http://download.java.net/maven/2/",
+      "Fyrie Repo" at "http://repo.fyrie.net/snapshots/",
+      "Akka Repo" at "http://repo.akka.io/snapshots/"
+    ),
 
     libraryDependencies ++= {
       val liftVersion = "2.4"
@@ -41,6 +44,8 @@ object LiftProjectBuild extends Build {
         "org.scala-tools.time" % "time_2.9.1" % "0.5",
         "joda-time" % "joda-time" % "2.0",
         "org.joda" % "joda-convert" % "1.1",
+        //"net.debasishg" % "redisclient_2.9.0" % "2.3.1",
+        "net.fyrie" % "fyrie-redis_2.9.1" % "2.0-SNAPSHOT",
         "postgresql" % "postgresql" % "8.4-702.jdbc4"
       )
     },

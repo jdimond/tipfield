@@ -2,45 +2,64 @@
 <html>
   <head><meta content="text/html; charset=UTF-8" http-equiv="content-type" />
     <title>Home</title>
-    <style type="text/css"><!--
-      table {
-        padding: 0px;
-      }
-      table th {
-        background: black;
-      }
-      -->
-    </style>
   </head>
   <body class="lift:content_id=main">
-    <div id="main" class="lift:surround?with=default;at=content">
-      <h2>Tippspiel Game</h2>
-      <table id="games" class="lift:GameListing.list">
-        <tr>
-          <th>Kick off</th>
-          <th>Match up</th>
-          <th>Result</th>
-          <th>Tip</th>
-        </tr>
-        <tr class="game">
-          <td id="gameTime">27.10.2011 15:30</td>
-          <td id="gameMatchup" class="gameMatchup">
-            <div id="gameTeamHome" class="gameTeam" style="text-align: right">Team One</div> :
-            <div id="gameTeamAway" class="gameTeam" style="text-align: left">Team Two</div>
-          </td>
-          <td id="gameResult">0 : 0</td>
-          <td id="gameTip">
-            <form id="gameId">
-              <input type="text" name="guessHome" class="goalInput" /> :
-              <input type="text" name="guessAway" class="goalInput" />
-              <input type="hidden" name="process" />
-              <input type="image" id="saveGameTip" src="/images/go.png" />
-              <img id="gameAjaxLoader" src="/images/ajax-loader.gif" style="display: none" />
-            </form>
-          </td>
-        </tr>
-      </table>
-    </div>
+    <section id="main" class="lift:surround?with=default;at=content">
+      <div class="row">
+        <div class="span6">
+          <h2>Untipped Games</h2>
+          <table id="games" class="lift:GameListing.list table table-bordered table-striped table-condensed">
+            <thead>
+              <tr>
+                <th>Kick off</th>
+                <th>Match up</th>
+                <th>Tip</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="game">
+                <td id="game_time">27.10.2011 15:30</td>
+                <td>
+                  <div id="game_team_home" class="game_team" style="text-align: right">Team One</div> :
+                  <div id="game_team_away" class="game_team" style="text-align: left">Team Two</div>
+                </td>
+                <td id="game_tip">
+                  <form id="game_form" class="form-horizontal">
+                    <input type="text" name="guess_home" class="goal_input spinner" /> :
+                    <input type="text" name="guess_away" class="goal_input spinner" />
+                    <input type="hidden" name="process" />
+                    <input type="image" id="save_game_button" src="/images/go.png" />
+                    <img id="game_ajax_loader" src="/images/ajax-loader.gif" style="display: none" />
+                    <a class="close">&times;</a>
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="span3">
+          <h2>Leaderboard</h2>
+          <table class="lift:UserRanking.global table table-striped table-bordered table-condensed">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="leaderboard_entry">
+                <td class="leaderboard_rank">1</td>
+                <td class="leaderboard_name align-left">
+                <img height="25px" width="25px" src="https://graph.facebook.com/jonathan.dimond/picture" />
+                <span class="full_name">Jonathan Dimond</span>
+                <td class="leaderboard_points">192</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   </body>
 </html>
 

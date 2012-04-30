@@ -17,21 +17,16 @@ import org.joda.time.format.DateTimeFormat
 
 import de.dimond.tippspiel.model._
 
-object Standings {
-  private object currentGroup extends RequestVar[String]("A")
-
-  private val groupsToSelect = Group.all map { x => (x.name, "Group %s".format(x.name)) } toList
-}
-
 class Standings {
   import scala.xml.Text
 
   def teamHtml(team: Team) = Seq(<img src={"/images/flags/" + team.emblemUrl} />, Text(team.name))
 
   def standings = {
-    import Standings._
+    val currentGroupName = S.param("group") openOr Group.all.head.name
+    val currentGroup = Group.forName(currentGroupName)
     val tableHtml = SHtml.idMemoize( table => {
-      ".standing" #> Group.forName(currentGroup.is).standings.zipWithIndex.map(x => {
+      ".standing" #> currentGroup.standings.zipWithIndex.map(x => {
         val standing = x._1
         val i = x._2 + 1
         "#standing_rank *" #> i &
@@ -44,7 +39,12 @@ class Standings {
         "#standing_points *" #> standing.points
       })
     })
-    "#group_select" #> ajaxSelect(groupsToSelect, Full(currentGroup.is), s => { currentGroup(s); tableHtml.setHtml }) &
+    "#group_select" #> {
+      "#group_name" #> "Group %s".format(currentGroup.name) &
+      "#group_items" #> {
+        "li *" #> Group.all.map(x => <a href={"/standings/%s".format(x.name)}>{"Group %s".format(x.name)}</a>)
+      }
+    } &
     "#standings" #> tableHtml
   }
 

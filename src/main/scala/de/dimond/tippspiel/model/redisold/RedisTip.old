@@ -1,0 +1,121 @@
+package de.dimond.tippspiel.model.redis
+
+import net.liftweb.common.{Box, Full, Empty, EmptyBox, Failure}
+
+import net.fyrie.redis.serialization.{Store, Parse}
+import net.fyrie.redis.serialization.Store._
+import net.fyrie.redis.serialization.Parse._
+import akka.util.ByteString
+
+import org.joda.time.DateTime
+import org.scala_tools.time.Imports._
+
+import de.dimond.tippspiel.model._
+import de.dimond.tippspiel.db.redis._
+import de.dimond.tippspiel.db._
+import ParseStoreImplicits._
+import PersistanceConfiguration._
+
+object PointsImplicits {
+  implicit val storePoints = new Store[Points] { def apply(points: Points) = storeInt(points.points) }
+  implicit val parsePoints = new Parse[Points] {
+    def apply(bs: ByteString) = parseInt(bs) match {
+      case p if p == PointsExact.points => PointsExact
+      case p if p == PointsSameDifference.points => PointsSameDifference
+      case p if p == PointsTendency.points => PointsTendency
+      case p if p == PointsNone.points => PointsNone
+    }
+  }
+}
+
+object RedisTip extends RedisTip with MetaRedisRecord[RedisTip] with MetaTip {
+  protected def newInstance = new RedisTip()
+
+  private val numberOfBlocks = 1000
+  private def gameTipListKey(userId: Long, gameId: Long) = "tip:tiplist:%d:%d".format(gameId, userId%numberOfBlocks)
+
+  def updatePoints(result: Result): Boolean = {
+    import akka.dispatch.Future
+    import de.dimond.tippspiel.db.RedisDb._
+    for (i <- 0 until numberOfBlocks) {
+      val users = RedisHelpers.waitFor(RedisDb.client.smembers("tip:tiplist:%d:%d".format(result.gameId, i)))
+      users match {
+        case Right(users) => {
+          /* TODO: fix */
+          val c = RedisDb.client
+          val saved = users.map { (uid: ByteString) => {
+            getIdForIndex(parseLong(uid), result.gameId)
+            for {
+              tipId <- c.get("tip:usertips:%d:%d".format(parseLong(uid), result.gameId))
+              val tid = parseLong(tipId.get)
+              h <- c.get("tip:%d:goalsHome".format(tid))
+              a <- c.get("tip:%d:goalsAway".format(tid))
+              val p = Points(parseInt(h.get), parseInt(a.get), result.goalsHome, result.goalsAway)
+              _ <- c.set("tip:%d:points".format(tid), p.points)
+            } yield ()
+          } }
+          RedisHelpers.waitFor(Future.sequence(saved)) /* TODO: increase timeout */
+        }
+        case _ => return false
+      }
+    }
+    true
+  }
+  def forUserAndGame(user: User, game: Game) = forUserIdAndGameId(user.id, game.id)
+
+  private def forUserIdAndGameId(userId: Long, gameId: Long) = {
+    val instance = newInstance()
+    instance._userId(userId)
+    instance._gameId(gameId)
+    findByIndex(instance._userGameIndex)
+  }
+
+  def saveForUserAndGame(user: User, game: Game, goalsHome: Int, goalsAway: Int): Boolean = {
+    val instance = new RedisTip()
+    instance._userId(user.id)
+    instance._gameId(game.id)
+    val newTip = findByIndex(instance._userGameIndex) match {
+      case Full(oldTip) => oldTip
+      case Empty => instance
+      case x: Failure => return false
+    }
+    newTip._userId(user.id)
+    newTip._gameId(game.id)
+    newTip._goalsHome(goalsHome)
+    newTip._goalsAway(goalsAway)
+    newTip._submissionTime(DateTime.now)
+    if (newTip.save()) {
+      val userSet = RedisDb.client.sadd(gameTipListKey(user.id, game.id), user.id)
+      RedisHelpers.waitFor(userSet) match {
+        case Right(_) => true
+        case Left(e) => {
+          delete(newTip.redisId.get.value)
+          /* FIXME: Delete */
+          false
+        }
+      }
+    } else {
+      false
+    }
+  }
+}
+
+class RedisTip private () extends RedisRecord[RedisTip]("tip") with Tip {
+  import PointsImplicits._
+
+  val _userId = new Field[Long, RedisTip](this, "uid", 0)
+  val _gameId = new Field[Long, RedisTip](this, "gid", 0)
+  val _goalsHome = new Field[Int, RedisTip](this, "gh", 0)
+  val _goalsAway = new Field[Int, RedisTip](this, "ga", 0)
+  val _points = new OptionalField[Points, RedisTip](this, "points")
+  val _submissionTime = new Field[DateTime, RedisTip](this, "time", DateTime.now)
+
+  val _userGameIndex = Index(this, "ugid", List(_userId, _gameId))
+
+  def userId = _userId.value
+  def gameId = _userId.value
+  def goalsHome = _goalsHome.value
+  def goalsAway = _goalsAway.value
+  def points = _points.value
+  def submissionTime = _submissionTime.value
+}

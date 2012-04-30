@@ -12,7 +12,10 @@ import net.liftweb.mapper.By
 
 import org.scala_tools.time.Imports._
 
-import de.dimond.tippspiel.model._
+import de.dimond.tippspiel._
+import de.dimond.tippspiel.model.{Points, PointsExact, PointsTendency, PointsSameDifference, PointsNone}
+import de.dimond.tippspiel.model.Game
+import de.dimond.tippspiel.model.PersistanceConfiguration._
 import de.dimond.tippspiel.util._
 
 object TipForm {
@@ -21,13 +24,13 @@ object TipForm {
   import net.liftweb.http.js.jquery._
   import net.liftweb.http._
   def render(game: Game): NodeSeq => NodeSeq = {
-    def renderBeforeGame(user: User) = {
-      var guessHome = 0
-      var guessAway = 0
+    def renderBeforeGame(user: model.User) = {
+      var guessHome = ""
+      var guessAway = ""
 
       def mkId(s: String) = {
-        val ids = Set("gameAjaxLoader",
-                      "saveGameTip")
+        val ids = Set("game_ajax_loader",
+                      "save_game_button")
         if (ids.contains(s)) {
           s + game.id
         } else {
@@ -36,9 +39,9 @@ object TipForm {
       }
 
       def showResultImg(path: String) = {
-        JqJsCmds.Hide(mkId("gameAjaxLoader")) &
-        JqJE.Jq("#" + mkId("saveGameTip")) ~> JqJE.JqAttr("src", path) &
-        JqJsCmds.Show(mkId("saveGameTip"))
+        JqJsCmds.Hide(mkId("game_ajax_loader")) &
+        JqJE.JqId(mkId("save_game_button")) ~> JqJE.JqAttr("src", path) &
+        JqJsCmds.Show(mkId("save_game_button"))
       }
 
       def success = {
@@ -50,46 +53,57 @@ object TipForm {
       }
 
       def process(): JsCmd = {
-        if (guessHome >= 0 && guessAway >= 0 && DateTime.now < game.date) {
-          val tip = Tip findByGame(user, game) openOr Tip.create.user(user).gameId(game.id)
-          tip.submissionTime(DateTime.now.toDate)
-          tip.goalsHome(guessHome)
-          tip.goalsAway(guessAway)
-          if (tip.save) {
-            success
-          } else {
-            failure
+        val home = Util.parseInt(guessHome)
+        val away = Util.parseInt(guessAway)
+        (home, away) match {
+          case (Some(h), Some(a)) if (h >= 0 && a >= 0 && DateTime.now < game.date) => {
+            val saved = Tip.saveForUserAndGame(user, game, h, a)
+            if (saved) {
+              success
+            } else {
+              failure
+            }
           }
-        } else {
-          failure
+          case _ => failure
         }
       }
 
       val bodyTrans = {
-        val tip = Tip findByGame(user, game)
-        val goalsHome = tip map { _.goalsHome.is } openOr 0
-        val goalsAway = tip map { _.goalsAway.is } openOr 0
-        val resetOnKeyDown = BasicElemAttr("oninput", showResultImg("/images/go.png"))
-        "#saveGameTip [src]" #> (if (tip.isEmpty) "/images/go.png" else "/images/check.png") &
-        "name=guessHome" #> SHtml.number(goalsHome, guessHome = _, 0, 10, resetOnKeyDown) &
-        "name=guessAway" #> SHtml.number(goalsAway, guessAway = _, 0, 10, resetOnKeyDown) &
+        val tip = Tip.forUserAndGame(user, game)
+        val goalsHome = tip map { _.goalsHome.toString } openOr "0"
+        val goalsAway = tip map { _.goalsAway.toString } openOr "0"
+        "#save_game_button [src]" #> (if (tip.isEmpty) "/images/fail.png" else "/images/check.png") &
+        "name=guess_home" #> SHtml.text(goalsHome, guessHome = _) &
+        "name=guess_away" #> SHtml.text(goalsAway, guessAway = _) &
         "name=process" #> SHtml.hidden(process)
       }
-      val showLoader = JqJsCmds.Hide(mkId("saveGameTip")) & JqJsCmds.Show(mkId("gameAjaxLoader"))
-      val hideLoader = JqJsCmds.Hide(mkId("gameAjaxLoader"))
+      val showLoader = JqJsCmds.Hide(mkId("save_game_button")) & JqJsCmds.Show(mkId("game_ajax_loader"))
+      val hideLoader = JqJsCmds.Hide(mkId("game_ajax_loader"))
       "form" #> {body => XmlHelpers.uniquifyIds(mkId)(SHtml.ajaxForm(bodyTrans(body), showLoader))}
     }
 
-    def renderAfterGame(user: User) = "* *" #> {
-      (Tip.findByGame(user, game), Result.forGame(game)) match {
+    def renderAfterGame(user: model.User) = "* *" #> {
+      def renderValue(value: String) = {
+        <input disabled="disabled" class="input goal_input disabled_tip" value={ value } />
+      }
+      (Tip.forUserAndGame(user, game), Result.forGame(game)) match {
         case (Full(tip), Full(result)) => {
-          Text("%s : %s".format(tip.goalsHome.is, tip.goalsAway.is))
+          renderValue(tip.goalsHome.toString) ++ Text(" : ") ++ renderValue(tip.goalsAway.toString) ++
+          Text(" ") ++
+          (tip.points match {
+            case Some(PointsExact) => <span class="badge badge-success">{ PointsExact.points }</span>
+            case Some(PointsSameDifference) => <span class="badge badge-warning">{ PointsSameDifference.points }</span>
+            case Some(PointsTendency) => <span class="badge badge-info">{ PointsTendency.points }</span>
+            case Some(PointsNone) => <span class="badge badge-error">{ PointsNone.points }</span>
+            case _ => <span class="badge">&nbsp;&nbsp;</span>
+          })
         }
         case (Full(tip), _) => {
-          Text("%s : %s".format(tip.goalsHome.is, tip.goalsAway.is))
+          renderValue(tip.goalsHome.toString) ++ Text(" : ") ++ renderValue(tip.goalsAway.toString)
         }
         case _ => {
-          Text("- : -")
+          renderValue("-") ++ Text(" : ") ++ renderValue("-") ++
+          Text(" ") ++ <span class="badge">&nbsp;&nbsp;</span>
         }
       }
     }
@@ -113,22 +127,28 @@ object TipForm {
 
 object GameSnippet {
   import scala.xml.Text
-  def teamHtml(ref: TeamReference) = ref.team match {
-    case Left(str) => Text(str)
-    case Right(team) => {
-      Seq(<img src={"/images/flags/" + team.emblemUrl} />, Text(team.name))
-    }
-  }
-  def html(game: Game) = {
-    "#gameId *" #> game.id &
-    "#gameTime *" #> DateHelpers.formatTime(game.date) &
-    "#gameTeamHome *" #> teamHtml(game.teamHome).reverse &
-    "#gameTeamAway *" #> teamHtml(game.teamAway) &
-    "#gameResult *" #> Result.goalsForGame(game) &
-    "#gameTip" #> TipForm.render(game)
+  def html(game: Game, hidden: Boolean = false) = {
+    "tr [id]" #> "game_id%d".format(game.id) &
+    (if (hidden) "tr [style]" #> "display: none"
+     else "tr [style]" #> "") &
+    "#game_id *" #> game.id &
+    "#game_time *" #> DateHelpers.formatTime(game.date) &
+    "#game_team_home *" #> SnippetHelpers.teamHtml(game.teamHome).reverse &
+    "#game_team_away *" #> SnippetHelpers.teamHtml(game.teamAway) &
+    "#game_result *" #> (Result.forGame(game) match {
+      case Full(result) => "%d : %d".format(result.goalsHome, result.goalsAway)
+      case _ => "- : -"
+    }) &
+    "#game_tip" #> TipForm.render(game)
   }
 }
 
 class GameListing {
-  def list = "#games" #> { ".game" #> Game.all.map(GameSnippet.html(_)) }
+  val user = User.currentUser open_!
+  def list = "#games" #> { ".game" #> Game.all.filter(game => {
+      DateTime.now < game.date &&
+      game.teamAway.team.isRight &&
+      game.teamHome.team.isRight &&
+      Tip.forUserAndGame(user, game).isEmpty
+    }).zipWithIndex.map(g => GameSnippet.html(g._1, g._2 >= 3)) }
 }

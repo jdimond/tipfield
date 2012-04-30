@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head><meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+    <title>Admin</title>
+  </head>
+  <body class="lift:content_id=main">
+    <div id="main" class="lift:surround?with=default;at=content">
+      <div class="alert" style="display: none;" id="result_alert">
+        <a class="close" data-dismiss="alert">×</a>
+        <span id="result_alert_text"><strong>Alert</strong>alert</span>
+      </div>
+      <section id="developer_mode" class="lift:Admin.developerTools">
+        <div class="page-header"><h1>Developer Mode</h1></div>
+        <form id="create_user_testset">
+          <input type="hidden" name="process" />
+          <button type="submit" class="btn btn-large btn-primary" data-loading-text="Loading...">
+            Create User Testset
+          </button>
+        </form>
+      </section>
+      <section id="database_tools" class="lift:Admin.databaseTools">
+        <div class="page-header"><h1>Database Tools</h1></div>
+        <form id="recalculate_all">
+          <input type="hidden" name="process" />
+          <button type="submit" class="btn btn-large btn-primary" data-loading-text="Loading...">
+            Recalculate Points
+          </button>
+        </form>
+      </section>
+      <section id="results" class="lift:Admin.resultEditor">
+        <div class="page-header"><h1>Result Editor</h1></div>
+        <div class="row">
+          <div class="span9">
+            <table class="table table-bordered table-striped" id="results">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Matchup</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="result_entry">
+                  <td id="game_time">27.10.2011 15:30</td>
+                  <td>
+                    <div id="game_team_home" class="game_team" style="text-align: right">Team One</div> :
+                    <div id="game_team_away" class="game_team" style="text-align: left">Team Two</div>
+                  </td>
+                  <td>
+                    <form id="result_form" class="form-horizontal">
+                      <input type="text" name="result_home" class="goal_input" /> :
+                      <input type="text" name="result_away" class="goal_input" />
+                      <input type="hidden" name="process" />
+                      <button type="submit" class="btn" data-loading-text="Saving...">Save</button>
+                      <img id="game_ajax_loader" src="/images/ajax-loader.gif" style="display: none" />
+                    </form>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <script>
+        $(".btn").click(function() {
+          $(this).removeClass("btn-success btn-error");
+          $(".btn").attr("disabled", "disabled");
+          $(this).button('loading');
+        });
+        success = function(title, text) {
+          var $resultAlert = $("#result_alert");
+          $("#result_alert_text").html("<strong>" + title + "</strong> " + text);
+          $resultAlert.removeClass("alert-error");
+          $resultAlert.addClass("alert-success");
+          $resultAlert.show();
+        }
+        error = function(title, text) {
+          var $resultAlert = $("#result_alert");
+          $("#result_alert_text").html("<strong>" + title + "</strong> " + text);
+          $resultAlert.removeClass("alert-success");
+          $resultAlert.addClass("alert-error");
+          $resultAlert.show();
+        }
+      </script>
+    </div>
+  </body>
+</html>
+

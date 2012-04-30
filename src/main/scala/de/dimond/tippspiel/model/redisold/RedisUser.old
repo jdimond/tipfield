@@ -1,0 +1,140 @@
+package de.dimond.tippspiel.model.redis
+
+import net.liftweb.common.{Box, Full, Empty, EmptyBox, Failure}
+
+import de.dimond.tippspiel.db.redis._
+import ParseStoreImplicits._
+
+import org.joda.time.DateTime
+import org.scala_tools.time.Imports._
+
+import de.dimond.tippspiel.model._
+import de.dimond.tippspiel.db.RedisDb
+
+object RedisUser extends RedisUser with MetaRedisRecord[RedisUser] with MetaUser[RedisUser] {
+  protected def newInstance = new RedisUser()
+
+  override def create(fullName: String, fbId: String) = {
+    val user = new RedisUser()
+    user.fullName = fullName
+    user.fbId = fbId
+    user
+  }
+
+  override def addPointsForUser(userId: Long, points: Int): Boolean = {
+    val protoUser = RedisRecord.instanceWithId(new RedisUser(), userId)
+    /*
+    FIXME:
+    val key = protoUser._points.fullKey
+    RedisHelpers.waitFor(RedisDb.client.incrby(key, points)) match {
+      case Right(_) => true
+      case Left(e) => false
+    }
+    */
+    false
+  }
+
+  override def findById(id: Long) = find(id)
+
+  override def findByFbId(fbId: String) = {
+    val instance = newInstance()
+    instance._fbId(fbId)
+    findByIndex(instance._fbIndex)
+  }
+  override def userRanking(count: Int) = List()
+}
+
+class RedisUser private () extends RedisRecord[RedisUser]("user") with User {
+  val _fullName = new Field[String, RedisUser](this, "fullname", "")
+  val _fbId = new Field[String, RedisUser](this, "fbId", "")
+  val _fbIndex  = Index(this, "fbId", List(_fbId))
+  val _isAdmin = new Field[Boolean, RedisUser](this, "isAdmin", false)
+  val _firstName = new OptionalField[String, RedisUser](this, "firstName")
+  val _middleName = new OptionalField[String, RedisUser](this, "middleName")
+  val _lastName = new OptionalField[String, RedisUser](this, "lastName")
+  val _gender = new OptionalField[String, RedisUser](this, "gender")
+  val _locale = new OptionalField[String, RedisUser](this, "locale")
+  val _fbUserName = new OptionalField[String, RedisUser](this, "fbUserName")
+  val _fbAccessToken = new OptionalField[String, RedisUser](this, "fbAccessToken")
+  val _fbTimeZone = new OptionalField[String, RedisUser](this, "fbTimeZone")
+
+  val _signupTime = new Field[DateTime, RedisUser](this, "signuptime", DateTime.now)
+
+  val _points = new Field[Int, RedisUser](this, "points", 0)
+  val _ranking = new OptionalField[Int, RedisUser](this, "ranking")
+
+  def id = redisId match {
+    case Some(id) => id.value
+    case None => throw new IllegalStateException("ID is not defined yet")
+  }
+
+  def fullName = _fullName.value
+  def fullName_=(str: String) = _fullName(str)
+
+  def fbId = _fbId.value
+  def fbId_=(id: String) = _fbId(id)
+
+  def isAdmin: Boolean = _isAdmin.value
+
+  def tips: Set[Long] = Set()
+  def tipForGame(id: Long): Option[Tip] = None
+
+  def firstName = _firstName.value
+  def firstName_=(firstName: Option[String]) = _firstName(firstName)
+  def middleName = _middleName.value
+  def middleName_=(middleName: Option[String]) = _middleName(middleName)
+  def lastName = _lastName.value
+  def lastName_=(lastName: Option[String]) = _lastName(lastName)
+  def gender = _gender.value
+  def gender_=(gender: Option[String]) = _gender(gender)
+  def locale = _locale.value
+  def locale_=(locale: Option[String]) = _locale(locale)
+
+  def fbUserName = _fbUserName.value
+  def fbUserName_=(fbUserName: Option[String]) = _fbUserName(fbUserName)
+
+  def fbAccessToken = _fbAccessToken.value
+  def fbAccessTokenExpires = Some(DateTime.now) //FIXME _fbAccessToken.expiresAt
+  def setFbAccessToken(accessToken: Option[String], expiresAt: Option[DateTime]) = {
+    _fbAccessToken(accessToken)
+    //_fbAccessToken.expiresAt(expiresAt)
+  }
+
+  def fbTimeZone = _fbTimeZone.value
+  def fbTimeZone_=(fbTimeZone: Option[String]) = _fbTimeZone(fbTimeZone)
+
+  def points = 0
+  def ranking = None
+}
+
+object RedisExtendedSession extends ExtendedSession {
+  import java.util.UUID
+  import de.dimond.tippspiel.db.RedisDb
+  import de.dimond.tippspiel.model.PersistanceConfiguration._
+  import net.fyrie.redis.serialization.Parse._
+
+  private def key(uuid: String): String = "cookie:%s".format(uuid)
+  private def key(uuid: UUID): String = key(uuid.toString)
+
+  def saveUserAndGetCookieId(user: User, exp: DateTime) = {
+    val uuid = UUID.randomUUID()
+    val success = RedisHelpers.waitFor(RedisDb.client.setnx(key(uuid), user.id))
+    success match {
+      case Right(true) => {
+        RedisDb.client.quiet.expireat(key(uuid), exp.getMillis/1000)
+        Full(uuid.toString)
+      }
+      case Right(false) => saveUserAndGetCookieId(user, exp)
+      case Left(e) => Failure("Failed to save cookie for user", Full(e), Empty)
+    }
+  }
+  def findUserIdForCookieId(cookieId: String) = {
+    val userId = RedisHelpers.waitFor(RedisDb.client.get(key(cookieId)))
+    userId match {
+      case Right(Some(id)) => Full((parseString(id), DateTime.now + 180.days))
+      case Right(None) => Empty
+      case Left(e) => Failure("Failed to get user id from cookie", Full(e), Empty)
+    }
+  }
+  def deleteCookieId(cookieId: String) = RedisDb.client.quiet.del(key(cookieId))
+}

@@ -5,7 +5,32 @@
   </head>
   <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
-      <a href="facebook/authorize"><img border="0" src="images/fb-connect-large.png" /></a>
+      <div id="fb-root"></div>
+      <script>
+        window.fbAsyncInit = function() {
+          FB.init({
+            appId      : '132919923500227', // App ID
+            channelUrl : '/static/channel.html', // Channel File
+            status     : true, // check login status
+            cookie     : true, // enable cookies to allow the server to access the session
+            xfbml      : true  // parse XFBML
+          });
+        };
+
+        // Load the SDK Asynchronously
+        (function(d){
+           var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+           if (d.getElementById(id)) {return;}
+           js = d.createElement('script'); js.id = id; js.async = true;
+           js.src = "//connect.facebook.net/en_US/all.js";
+           ref.parentNode.insertBefore(js, ref);
+         }(document));
+      </script>
+      <a href="facebook/authorize"><img border="0" src="images/fb-connect-large.png" /></a><br />
+      <div class="fb-facepile" data-max-rows="2" data-width="500"></div>
+      <div class="fb-login-button" data-show-faces="true" data-width="200" data-max-rows="1"></div>
+      <iframe src="http://www.facebook.com/plugins/facepile.php?app_id=132919923500227" scrolling="no" frameborder="0"
+        style="border: 3px; overflow:hidden; width:200px;" allowTransparency="true"></iframe>
     </div>
   </body>
 </html>

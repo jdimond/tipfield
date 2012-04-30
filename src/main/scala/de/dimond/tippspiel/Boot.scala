@@ -8,60 +8,22 @@ import common._
 import http._
 import sitemap._
 import Loc._
-import db.{StandardDBVendor, DB, DefaultConnectionIdentifier}
-import mapper.Schemifier
 
 import de.dimond.tippspiel.model._
 import de.dimond.tippspiel.lib._
-
+import de.dimond.tippspiel.model.PersistanceConfiguration._
 
 /**
  * A class that's instantiated early and run.  It allows the application
  * to modify lift's environment
  */
-class Boot extends Bootable {
-  def setupDb() {
-    import de.dimond.tippspiel.model._
-    import java.util.Date
-
-    def date(s: String) = new Date()
-
-    Result.bulkDelete_!!()
-
-    Result.create.gameId(1).goalsHome(1).goalsAway(0).save
-    Result.create.gameId(2).goalsHome(0).goalsAway(2).save
-    Result.create.gameId(3).goalsHome(2).goalsAway(3).save
-    Result.create.gameId(4).goalsHome(4).goalsAway(1).save
-    Result.create.gameId(5).goalsHome(0).goalsAway(0).save
-    Result.create.gameId(6).goalsHome(2).goalsAway(1).save
-    Result.create.gameId(7).goalsHome(0).goalsAway(0).save
-    Result.create.gameId(8).goalsHome(3).goalsAway(0).save
-    Result.create.gameId(9).goalsHome(1).goalsAway(1).save
-    Result.create.gameId(10).goalsHome(1).goalsAway(3).save
-    Result.create.gameId(11).goalsHome(1).goalsAway(2).save
-    Result.create.gameId(12).goalsHome(1).goalsAway(2).save
-    Result.create.gameId(13).goalsHome(3).goalsAway(3).save
-    Result.create.gameId(14).goalsHome(0).goalsAway(0).save
-    Result.create.gameId(15).goalsHome(3).goalsAway(1).save
-    Result.create.gameId(16).goalsHome(1).goalsAway(1).save
-    Result.create.gameId(17).goalsHome(0).goalsAway(0).save
-    Result.create.gameId(18).goalsHome(2).goalsAway(3).save
-    Result.create.gameId(19).goalsHome(1).goalsAway(4).save
-    Result.create.gameId(20).goalsHome(4).goalsAway(2).save
-    Result.create.gameId(21).goalsHome(3).goalsAway(4).save
-    Result.create.gameId(22).goalsHome(1).goalsAway(0).save
-    Result.create.gameId(23).goalsHome(1).goalsAway(0).save
-    Result.create.gameId(24).goalsHome(1).goalsAway(0).save
-
-    Result.create.gameId(25).goalsHome(4).goalsAway(1).save
-    Result.create.gameId(26).goalsHome(2).goalsAway(0).save
-    Result.create.gameId(27).goalsHome(1).goalsAway(0).save
-  }
+class Boot extends Bootable with Logger {
   def boot {
     // where to search snippet
     LiftRules.addToPackages("de.dimond.tippspiel")
 
     val ifLoggedIn = If (() => User.loggedIn_?, () => RedirectResponse("/login"))
+    val ifAdmin = If(() => Props.devMode || User.superUser_?, () => RedirectResponse("/index"))
 
     // Build SiteMap
     val entries = List(
@@ -69,6 +31,7 @@ class Boot extends Bootable {
       Menu(Loc("Home", List("index") -> false, "Home", ifLoggedIn)),
       Menu(Loc("Spielplan", List("schedule") -> false, "Schedule", ifLoggedIn)),
       Menu(Loc("Standings", List("standings") -> false, "Standings")),
+      Menu(Loc("Admin", List("admin") -> false, "Admin", ifAdmin)),
       Menu.i("Login") / "login" >> Hidden
     )
 
@@ -87,6 +50,7 @@ class Boot extends Bootable {
       case Req("classpath" :: _, _, _) => true
       case Req("ajax_request" :: _, _, _) => true
       case Req("favicon" :: Nil, "ico", GetRequest) => false
+      case Req("static" :: _, _, _) => false
       case Req(_, "css", GetRequest) => false
       case Req(_, "js", GetRequest) => false
     }
@@ -94,6 +58,8 @@ class Boot extends Bootable {
     LiftRules.statelessRewrite.append {
       case RewriteRequest(ParsePath(List("schedule", matchday),_,_,_),_,_) =>
          RewriteResponse("schedule" :: Nil, Map("matchday" -> matchday))
+      case RewriteRequest(ParsePath(List("standings", group),_,_,_),_,_) =>
+         RewriteResponse("standings" :: Nil, Map("group" -> group))
     }
 
     // Make sure ExtendedSession is used
@@ -117,14 +83,8 @@ class Boot extends Bootable {
     LiftRules.htmlProperties.default.set((r: Req) =>
       new Html5Properties(r.userAgent))
 
-    val dbVendor = new StandardDBVendor(Props get "db.driver" openOr "org.postgresql.Driver",
-                                        Props get "db.url" openOr "jdbc:postgresql://localhost/tippspiel",
-                                        Empty, Empty)
-    DB.defineConnectionManager(DefaultConnectionIdentifier, dbVendor)
-    Schemifier.schemify(true, Schemifier.infoF _, Result, Tip, User, ExtendedSession)
-
     GameData.init(Props.testMode || Props.devMode)
 
-    setupDb()
+    PersistanceConfiguration.initialize()
   }
 }

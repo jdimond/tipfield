@@ -1,72 +1,155 @@
 body {
-  /*font-family: "lucida grande",tahoma,verdana,arial,sans-serif;*/
+  padding-top: 0px;
+  padding-bottom: 40px;
 }
-#games {
-  padding: 0px;
-  cell-padding: 5px;
-  text-align: center;
-  border: 5px;
+#header {
+  background: url("/img/bg-header.gif") repeat-x scroll left top #262F35;
+  -float: left;
+  width: 100%;
+  min-height: 100px;
+}
+#userbox a {
+  color: #CCC;
+}
+#userbox strong {
+  color: #FFFFFF;
+}
+#userbox a:hover {
+  color: #FFF;
+  text-decoration: none;
+}
+#userbox {
+  background: url("/img/bg-userbox.png") no-repeat scroll left bottom transparent;
+  float: right;
+  margin: 0px 0 20px;
+  padding: 6px 16px 0;
+  width: 205px;
+  min-height: 70px;
+}
+#userbox p {
+  color: #CCCCCC;
+  font-size: 11px;
+  margin: 6px 0 1.7em;
+}
+#userbox img {
+  background: none repeat scroll 0 0 #FFFFFF;
+  border: 1px solid #424A53;
+  float: left;
+  margin: 6px 12px 0 4px;
+  padding: 4px;
+}
+.wrapper {
+  margin: 0 auto;
+  text-align: left;
+  width: 860px;
+}
+#logo {
+  color: #FFFFFF;
+  float: left;
+  margin: 29px 0 0;
+  width: 342px;
+}
+#logo span, #logo a {
+  background: url("/images/logo.png") no-repeat scroll 0 0 transparent;
+  border: medium none;
+  display: block;
+  height: 50px;
+  width: 342px;
+}
+#logo img {
+  border: medium none;
+  display: block;
+  width: 0;
+}
+#pagebar {
+  background: url("/img/bg-pagebar.gif") repeat-x scroll left top #BDE562;
+  border-bottom: 1px solid #A4CF43;
   width: 100%;
 }
-
-#games th {
-  background: black;
-  color: white;
+#navigation ul {
+  padding-top: 10px;
+  padding-bottom: 5px;
+  margin-bottom: 0px;
 }
-
-#games .goalInput {
-  border: 1px solid #aaaaaa;
+.container {
+  margin-top: 20px;
+}
+.goal_input {
   width: 20px;
 }
-
-#games .final_tip {
-  background: #eee;
-}
-
-#games .gameMatchup {
-  width: 400px;
-}
-
-#games .gameTeam {
+.game_team {
   display: inline-block;
   width: 45%;
 }
-
-#games img {
-  margin-left: 5px;
-  margin-right: 5px;
+.game_team img {
+  margin: 0 5px;
 }
-#standings {
+.full_width {
   width: 100%;
 }
-#standings .number {
-  text-align: right;
+.selection_row {
+  margin-bottom: 10px;
 }
-
-.matchday_selection {
-  width: 100%;
-  padding-bottom: 5px;
-}
-
-.matchday_selection li {
-  list-style-type: none;
-  display: inline-block;
-  width: 33%
-}
-
-#next_matchday {
-  text-align: right;
-  float: right;
-  position: relative;
-  top: 7px;
-}
-
 #matchday_select {
+}
+.spinner {
+  display: block;
+}
+.spinner_outer {
+  position: absolute;
+}
+.spinner_buttons {
+  position: absolute;
+  left: -16px;
+  top: 6px;
+  width: 16px;
+  height: 16px;
+}
+.spinner_button {
+  margin: 0;
+  line-height: 10px;
+  overflow: hidden;
+  text-indent: -99999px;
+  cursor: pointer;
+}
+.spinner_down {
+  display: block;
+  background-image: url("/img/arrows.png");
+  background-position: -16px -5px;
+}
+.spinner_down:hover {
+  background-position: -16px -20px;
+}
+.spinner_up {
+  display: block;
+  margin-left: -1px;
+  background-image: url("/img/arrows.png");
+  background-position: 0px -5px;
+}
+.spinner_up:hover {
+  background-position: 0px -20px;
+}
+.table th {
   text-align: center;
 }
-
-#prev_matchday {
-  text-align: left;
-  position: relative;
-  top: 7px;
+.table td {
+  vertical-align: middle;
+  text-align: center;
+}
+.table form {
+  margin-bottom: 0px;
+}
+.disabled_tip {
+  cursor: text;
+  margin-bottom: 0px;
+  display: inline-block;
+}
+input[disabled] {
+  cursor: text;
+}
+.align-right {
+  text-align: right ! important;
+}
+.align-left {
+  text-align: left ! important;
 }

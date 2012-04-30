@@ -1,0 +1,41 @@
+package de.dimond.tippspiel.model.redis
+
+import net.liftweb.common.{Box, Full, Empty, EmptyBox, Failure}
+
+import de.dimond.tippspiel.db.redis._
+import ParseStoreImplicits._
+
+import org.joda.time.DateTime
+import org.scala_tools.time.Imports._
+
+import de.dimond.tippspiel.model._
+
+object RedisResult extends RedisResult with MetaRedisRecord[RedisResult] with MetaResult {
+  protected def newInstance = new RedisResult()
+
+  override def saveForGame(game: Game, goalsHome: Int, goalsAway: Int) = {
+    val result = new RedisResult().withId(game.id)
+    result._goalsHome(goalsHome)
+    result._goalsAway(goalsAway)
+    result.save() match {
+      case true => Full(result)
+      case false => Empty
+    }
+  }
+
+  override def forGame(game: Game) = find(game.id)
+}
+
+class RedisResult private () extends RedisRecord[RedisResult]("result") with Result {
+  val _goalsHome = new Field[Int, RedisResult](this, "gh", 0)
+  val _goalsAway = new Field[Int, RedisResult](this, "ga", 0)
+
+  def goalsHome = _goalsHome.value
+  def goalsAway = _goalsAway.value
+  def gameId = {
+    redisId match {
+      case Some(id) => id.value
+      case None => throw new IllegalStateException("Result without game ID found")
+    }
+  }
+}

@@ -5,31 +5,40 @@
   </head>
   <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
-      <h2>Standings</h2>
       <div class="lift:Standings.standings">
-        <div id="group_select"></div>
-        <table id="standings">
-          <tr>
-            <th></th>
-            <th>Team</th>
-            <th>Games Played</th>
-            <th>Won</th>
-            <th>Drawn</th>
-            <th>Lost</th>
-            <th>Goals</th>
-            <th>Points</th>
-          </tr>
-          <tr class="standing">
-            <td id="standing_rank" class="number">1</td>
-            <td id="standing_team">Germany</td>
-            <td id="standing_played" class="number">5</td>
-            <td id="standing_won" class="number">3</td>
-            <td id="standing_drawn" class="number">2</td>
-            <td id="standing_lost" class="number">0</td>
-            <td id="standing_goals" class="number">10</td>
-            <td id="standing_points" class="number">11</td>
-          </tr>
-        </table>
+        <div class="btn-group selection_row" id="group_select">
+          <a id="current_group" class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+            <span id="group_name"></span>
+            <span class="caret"></span>
+          </a>
+          <ul id="group_items" class="dropdown-menu">
+            <li><a href="#">Group A</a></li>
+          </ul>
+        </div>
+        <div class="row">
+          <table id="standings" class="table table-bordered table-striped span6">
+            <tr>
+              <th></th>
+              <th class="align-left">Team</th>
+              <th>Games Played</th>
+              <th>Won</th>
+              <th>Drawn</th>
+              <th>Lost</th>
+              <th>Goals</th>
+              <th>Points</th>
+            </tr>
+            <tr class="standing">
+              <td id="standing_rank" class="number">1</td>
+              <td id="standing_team" class="align-left">Germany</td>
+              <td id="standing_played" class="number">5</td>
+              <td id="standing_won" class="number">3</td>
+              <td id="standing_drawn" class="number">2</td>
+              <td id="standing_lost" class="number">0</td>
+              <td id="standing_goals" class="number">10</td>
+              <td id="standing_points" class="number">11</td>
+            </tr>
+          </table>
+        </div>
       </div>
     </div>
   </body>

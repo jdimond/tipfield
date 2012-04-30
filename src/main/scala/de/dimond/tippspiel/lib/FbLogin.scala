@@ -13,7 +13,7 @@ import java.io.InputStream
 
 import org.joda.time._
 
-import de.dimond.tippspiel.model._
+import de.dimond.tippspiel.model.PersistanceConfiguration._
 
 object FbLogin {
   val appId = Props get("fb.AppId") open_!
@@ -28,7 +28,7 @@ object FbLogin {
                     last_name: Option[String],
                     gender: Option[String],
                     locale: Option[String],
-                    timezone: Option[Int])
+                    timezone: Option[String])
 
   object csrfSessionCode extends SessionVar[Box[String]](Empty)
 
@@ -86,21 +86,28 @@ object FbLogin {
       val json = call(meUrl, x => JsonParser.parse(isToString(x)))
       val fbUser = json.extract[FbUser]
 
-      val user = User.findByFbId(fbUser.id).openOr(User.create)
+      val user = User.findByFbId(fbUser.id) match {
+        case Full(user) => {
+          user.fullName = fbUser.name
+          user.fbId = fbUser.id
+          user
+        }
+        case Empty => User.create(fbUser.name, fbUser.id)
+        case Failure(m, eb, _) => eb match {
+          case Full(e) => throw new RuntimeException("Error occured during Facebook login: " + m, e)
+          case _ => throw new RuntimeException("Error occured during Facebook login: " + m)
+        }
+      }
 
-      user.facebookId(fbUser.id)
-      user.fbAccessToken(accessToken)
-      user.fbAccessTokenExpires(new DateTime().plusSeconds(expires.toInt).toDate)
+      user.setFbAccessToken(Some(accessToken), Some(new DateTime().plusSeconds(expires.toInt)))
 
-      user.fullName(fbUser.name)
-
-      fbUser.username.map(user.fbUserName(_))
-      fbUser.first_name.map(user.firstName(_))
-      fbUser.middle_name.map(user.middleName(_))
-      fbUser.last_name.map(user.lastName(_))
-      fbUser.gender.map(user.gender(_))
-      fbUser.locale.map(user.locale(_))
-      fbUser.timezone.map(user.fbTimeZone(_))
+      user.fbUserName = fbUser.username
+      user.firstName = fbUser.first_name
+      user.middleName = fbUser.middle_name
+      user.lastName = fbUser.last_name
+      user.gender = fbUser.gender
+      user.locale = fbUser.locale
+      user.fbTimeZone = fbUser.timezone
 
       if (user.save) {
         User.logUserIn(user)
