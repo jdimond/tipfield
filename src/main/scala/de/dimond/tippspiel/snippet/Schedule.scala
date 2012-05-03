@@ -24,7 +24,7 @@ class Schedule {
     matchDay match {
       case Some(m) => {
         <a href={"/schedule/%s".format(m.id)} class="btn">
-          { m.name }
+          { m.toString() }
           <i class="icon-arrow-right"></i>
         </a>
       }
@@ -41,7 +41,7 @@ class Schedule {
       case Some(m) => {
         <a href={"/schedule/%s".format(m.id)} class="btn">
           <i class="icon-arrow-left"></i>
-          { m.name }
+          { m.toString() }
         </a>
       }
       case None => {
@@ -57,9 +57,9 @@ class Schedule {
     val matchday = MatchDay.forId(matchdayId)
     val all = MatchDay.all
     "#matchday_select" #> {
-      "#matchday_name" #> "%s".format(matchday.name) &
+      "#matchday_name" #> matchday.toString() &
       "#matchday_items" #> {
-        "li *" #> all.map(x => <a href={"/schedule/%s".format(x.id)}>{"%s".format(x.name)}</a>)
+        "li *" #> all.map(x => <a href={"/schedule/%s".format(x.id)}>{x.toString()}</a>)
       }
     } &
     "#next_matchday *" #> (all.indexOf(matchday) match {

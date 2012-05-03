@@ -12,6 +12,9 @@ import Loc._
 import de.dimond.tippspiel.model._
 import de.dimond.tippspiel.lib._
 import de.dimond.tippspiel.model.PersistanceConfiguration._
+import java.util.Locale
+import net.liftweb.http.provider.HTTPRequest
+import de.dimond.tippspiel.util.Util
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -28,11 +31,11 @@ class Boot extends Bootable with Logger {
     // Build SiteMap
     val entries = List(
       //Menu.i("Home") / "index", // the simple way to declare a menu
-      Menu(Loc("Home", List("index") -> false, "Home", ifLoggedIn)),
-      Menu(Loc("Spielplan", List("schedule") -> false, "Schedule", ifLoggedIn)),
-      Menu(Loc("Standings", List("standings") -> false, "Standings")),
-      Menu(Loc("Admin", List("admin") -> false, "Admin", ifAdmin)),
-      Menu.i("Login") / "login" >> Hidden
+      Menu(Loc("Home", List("index") -> false, S.?("home"), ifLoggedIn)),
+      Menu(Loc("Schedule", List("schedule") -> false, S.?("schedule"), ifLoggedIn)),
+      Menu(Loc("Standings", List("standings") -> false, S.?("standings"))),
+      Menu(Loc("Admin", List("admin") -> false, S.?("admin"), ifAdmin)),
+      Menu.i("login") / "login" >> Hidden
     )
 
     // set the sitemap.  Note if you don't want access control for
@@ -83,8 +86,34 @@ class Boot extends Bootable with Logger {
     LiftRules.htmlProperties.default.set((r: Req) =>
       new Html5Properties(r.userAgent))
 
+    // Use our own Locale calculation method and resources
+    LiftRules.localeCalculator = localeCalculator _
+    LiftRules.resourceNames = "i18n/messages" :: LiftRules.resourceNames
+
     GameData.init(Props.testMode || Props.devMode)
 
     PersistanceConfiguration.initialize()
   }
+
+  /** Determine user locale to serve site in right language:
+   * - Logged in: Fb locale
+   * - Logged out: Browser locale
+   */
+  def localeCalculator(request : Box[HTTPRequest]): Locale = User.currentUser match {
+    case Full(user) => user.locale.map(Util.localeFromString(_)).getOrElse(calculateLocaleFromRequest(request))
+    case _ => calculateLocaleFromRequest(request)
+  }
+
+  private def calculateLocaleFromRequest(request: Box[HTTPRequest]): Locale = {
+    request.flatMap(r => {
+      def calcLocale: Box[Locale] = Full(LiftRules.defaultLocaleCalculator(request))
+      S.param("locale") match {
+        case Full(null) => calcLocale
+        case f@Full(selectedLocale) => tryo(Util.localeFromString(selectedLocale))
+        case _ => calcLocale
+      }
+    }).openOr(Locale.getDefault())
+  }
+
 }
+

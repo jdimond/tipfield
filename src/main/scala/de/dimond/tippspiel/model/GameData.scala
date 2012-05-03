@@ -15,42 +15,41 @@ object GameData {
       }
     }
     // Group A
-    val poland = Team("Poland", "poland.png", 23806)
-    val greece = Team("Greece", "greece.png", 29995)
-    val russia = Team("Russia", "russia.png", 30671)
-    val czechRepublic = Team("Czech Republic", "czech_republic.png", 26456)
+    val poland = Team("poland", "poland.png", 23806)
+    val greece = Team("greece", "greece.png", 29995)
+    val russia = Team("russia", "russia.png", 30671)
+    val czechRepublic = Team("czech_republic", "czech_republic.png", 26456)
 
     // Group B
-    val netherlands = Team("Netherlands", "netherlands.png", 39660)
-    val denmark = Team("Denmark", "denmark.png", 28105)
-    val germany = Team("Germany", "germany.png", 37966)
-    val portugal = Team("Portugal", "portugal.png", 29677)
+    val netherlands = Team("netherlands", "netherlands.png", 39660)
+    val denmark = Team("denmark", "denmark.png", 28105)
+    val germany = Team("germany", "germany.png", 37966)
+    val portugal = Team("portugal", "portugal.png", 29677)
 
     // Group C
-    val spain = Team("Spain", "spain.png", 40016)
-    val italy = Team("Italy", "italy.png", 32697)
-    val ireland = Team("Ireland", "ireland.png", 25743)
-    val croatia = Team("Croatia", "croatia.png", 31523)
+    val spain = Team("spain", "spain.png", 40016)
+    val italy = Team("italy", "italy.png", 32697)
+    val ireland = Team("ireland", "ireland.png", 25743)
+    val croatia = Team("croatia", "croatia.png", 31523)
 
     // Group D
-    val ukraine = Team("Ukraine", "ukraine.png", 28029)
-    val sweden = Team("Sweden", "sweden.png", 29235)
-    val france = Team("France", "france.png", 28848)
-    val england = Team("England", "england.png", 33063)
-
+    val ukraine = Team("ukraine", "ukraine.png", 28029)
+    val sweden = Team("sweden", "sweden.png", 29235)
+    val france = Team("france", "france.png", 28848)
+    val england = Team("england", "england.png", 33063)
 
     val utc3 = DateTimeZone.forOffsetHours(3)
     val utc2 = DateTimeZone.forOffsetHours(2)
 
-    val warsaw = Location("Warsaw")
-    val gdansk = Location("Gdańsk")
-    val wroclaw = Location("Wrocław")
-    val poznan = Location("Poznań")
+    val warsaw = Location("warsaw")
+    val gdansk = Location("gdansk")
+    val wroclaw = Location("wroclaw")
+    val poznan = Location("poznan")
 
-    val kiev = Location("Kiev")
-    val donetsk = Location("Donetsk")
-    val kharkiv = Location("Kharkiv")
-    val lviv = Location("Lviv")
+    val kiev = Location("kiev")
+    val donetsk = Location("donetsk")
+    val kharkiv = Location("kharkiv")
+    val lviv = Location("lviv")
 
     val game01 = Game(1, poland.reference, greece.reference, createDateTime(2012, 6, 8, 18, 00, utc2), warsaw)
     val game02 = Game(2, russia.reference, czechRepublic.reference, createDateTime(2012, 6, 8, 20, 45, utc2), wroclaw)
@@ -107,15 +106,15 @@ object GameData {
     val game31 = Game(31, GameWinner(game29), GameWinner(game30),
                       createDateTime(2012, 7, 1, 21, 45, utc3), kiev)
 
-    val matchDay1 = MatchDay("matchday1", "Matchday 1",
+    val matchDay1 = MatchDay("matchday1", "matchday_1",
                              Seq(game01, game02, game03, game04, game05, game06, game07, game08))
-    val matchDay2 = MatchDay("matchday2", "Matchday 2",
+    val matchDay2 = MatchDay("matchday2", "matchday_2",
                              Seq(game09, game10, game11, game12, game13, game14, game15, game16))
-    val matchDay3 = MatchDay("matchday3", "Matchday 3",
+    val matchDay3 = MatchDay("matchday3", "matchday_3",
                              Seq(game17, game18, game19, game20, game21, game22, game23, game24))
-    val quarterFinals = MatchDay("quarter-finals", "Quarter-finals", Seq(game25, game26, game27, game28))
-    val semiFinals = MatchDay("semi-finals", "Semi-finals", Seq(game29, game30))
-    val matchDayFinal = MatchDay("final", "Final", Seq(game31))
+    val quarterFinals = MatchDay("quarter-finals", "quarter_finals", Seq(game25, game26, game27, game28))
+    val semiFinals = MatchDay("semi-finals", "semi_finals", Seq(game29, game30))
+    val matchDayFinal = MatchDay("final", "final", Seq(game31))
 
     MatchDay.init(Seq(matchDay1, matchDay2, matchDay3, quarterFinals, semiFinals, matchDayFinal))
   }
