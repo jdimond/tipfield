@@ -8,4 +8,4 @@ chmod 755 ./scripts/* || exit 1
 
 echo "Compiling code and running tests ..."
 sbt compile || exit 1
-#$SBT update test || exit 1
+sbt update test || exit 1
