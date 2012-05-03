@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head><meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+    <title>Home</title>
+  </head>
+  <body class="lift:content_id=main">
+    <div id="main" class="lift:surround?with=default;at=content">
+      <div class="row">
+        <div class="span3">
+          <div class="well">
+            <h3 class="lift:Pools.poolName"><i>This Pool</i></h3>
+            <p class="lift:Pools.inviteFriendsButton">
+              <a href="#" id="invite_friends_button">
+                <button type="submit" class="btn btn-info full_width">
+                  <i class="icon-plus icon-white"></i>
+                  <span class="lift:loc.invite_friends">Invite Friends</span>
+                </button>
+              </a>
+              <input type="hidden" name="process">
+            </p>
+            <form id="leave_pool_button" method="POST" class="lift:Pools.leavePoolButton">
+              <p>
+                <button type="submit" class="btn btn-danger full_width">
+                  <i class="icon-minus-sign icon-white"></i>
+                  <span class="lift:loc.leave_pool">Leave Pool</span>
+                </button>
+                <input type="hidden" name="process">
+              </p>
+            </form>
+            <br />
+
+            <div class="lift:Pools.poolList">
+              <h3><span class="lift:loc.my_pools">My Pools</span></h3>
+              <p class="pool_entry">
+                <a class="pool_link" href="#">
+                  <button type="submit" class="btn pool_button full_width"></button>
+                </a>
+              </p>
+              <br />
+            </div>
+
+            <div class="lift:Pools.invitations" id="pool_invitations">
+              <h3><span class="lift:loc.invitations">Invitations</span></h3>
+              <table class="full_width">
+                <tr class="invitation_entry">
+                  <td width="100%" class="pool_name">New Pool</td>
+                  <td>
+                    <a class="join_link" href="#">
+                      <button type="submit" class="btn btn-success">
+                        <span class="lift:loc.join">Join</span>
+                      </button>
+                    </a>
+                  </td>
+                  <td>
+                    <a class="ignore_link" href="#">
+                      <button type="submit" class="btn btn-danger">
+                        <span class="lift:loc.ignore">Ignore</span>
+                      </button>
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <br />
+            </div>
+
+            <h3><span class="lift:loc.new_pool">New Pool</span></h3>
+            <form class="form-horizontal lift:Pools.createPoolForm" id="create_pool_form" method="POST">
+              <input type="hidden" name="process" />
+              <fieldset class="control-group" id="pool_name_group">
+                <input name="pool_name" type="text" class="full_width" placeholder="Pool Name…" onfocus="$('#pool_name_group').removeClass('error')"/>
+              </fieldset>
+              <p><textarea name="pool_description" class="full_width" placeholder="Description (optional)…" style="resize:none;"></textarea></p>
+              <p>
+                <input name="allow_member_invite" type="checkbox" checked />
+                <span class="lift:loc.allow_member_invite">
+                  Allow members to invite new members
+                </span>
+              </p>
+              <button name="create_pool_button" type="submit" class="btn btn-success full_width">
+                <i class="icon-plus-sign icon-white"></i>
+                <span class="lift:loc.create_new_pool">Create New Pool</span>
+              </button></br>
+            </form>
+          </div>
+        </div>
+        <div class="span6">
+          <table class="lift:Pools.poolRanking table table-striped table-bordered table-condensed">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="ranking_entry">
+                <td class="ranking_rank">1</td>
+                <td class="ranking_name align-left">
+                <img height="25px" width="25px" src="https://graph.facebook.com/jonathan.dimond/picture" />
+                <span class="ranking_full_name">Jonathan Dimond</span>
+                <td class="ranking_points">192</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <div id="fb-root"></div>
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({
+          //appId      : '132919923500227', // Localhost
+          appId      : '190563654389493', // Server
+          channelUrl : '/static/channel.html', // Channel File
+          status     : true, // check login status
+          cookie     : true, // enable cookies to allow the server to access the session
+          xfbml      : true  // parse XFBML
+        });
+
+        // Additional initialization code here
+      };
+
+      // Load the SDK Asynchronously
+      (function(d){
+         var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement('script'); js.id = id; js.async = true;
+         js.src = "//connect.facebook.net/en_US/all.js";
+         ref.parentNode.insertBefore(js, ref);
+       }(document));
+       function requestCallback(response) {
+          alert(response);
+       }
+    </script>
+    </div>
+  </body>
+</html>
+

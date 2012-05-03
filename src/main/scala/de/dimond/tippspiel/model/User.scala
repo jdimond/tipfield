@@ -23,6 +23,13 @@ import S._
 
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 
+sealed trait Rank {
+  def is: Int
+}
+
+case class PrimaryRank(is: Int) extends Rank
+case class SecondaryRank(is: Int) extends Rank
+
 trait MetaUser[U <: User] extends ProtoUser with Logger {
   self: U =>
 
@@ -72,14 +79,28 @@ trait MetaUser[U <: User] extends ProtoUser with Logger {
     try {
       findById(strId.toInt)
     } catch {
-      case e: NumberFormatException => Failure("Failed to parse ID as Long", Full(e), Empty)
+      case e: NumberFormatException => Failure("Failed to parse \"%s\" as Long".format(strId), Full(e), Empty)
     }
   }
 
   def create(fullName: String, fbId: String): User
   def findById(id: Long): Box[User]
   def findByFbId(fbId: String): Box[User]
-  def userRanking(count: Int): Seq[(Option[Int], User)]
+  def userRanking(count: Int): Seq[(Rank, User)]
+
+  def rankUsers[B](users: Seq[User]): Seq[(Rank, User)] = {
+    val stableSorted = users.groupBy(_.points).toSeq.sortBy(_._1).reverse.map(_._2).flatten
+    stableSorted.foldLeft((1, 0, Int.MaxValue, List(): List[(Rank, User)]))({
+      case ((counter, currentRank, oldPoints, list), user) => {
+        if (user.points==oldPoints) {
+          ((counter + 1), currentRank, user.points, ((SecondaryRank(currentRank), user)) :: list)
+        } else {
+          ((counter + 1), counter, user.points, ((PrimaryRank(counter), user)) :: list)
+        }
+      }
+    })._4.reverse
+  }
+
   def addPointsForUser(userId: Long, points: Int): Boolean
 
   onLogIn = List(ExtendedSession.userDidLogin(_))
@@ -120,6 +141,11 @@ trait User {
   def fbTimeZone_=(fbTimeZone: Option[String]): Unit
 
   def profilePictureUrl: String = "https://graph.facebook.com/%s/picture".format(fbId)
+
+  def facebookFriends: Set[String]
+  def facebookFriends_=(ids: Set[String]): Unit
+
+  def friends: Set[Long]
 
   def points: Int
   def ranking: Option[Int]

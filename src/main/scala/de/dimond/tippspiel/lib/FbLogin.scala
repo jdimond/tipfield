@@ -109,6 +109,31 @@ object FbLogin {
       user.locale = fbUser.locale
       user.fbTimeZone = fbUser.timezone
 
+      def getFriends(url: String): Seq[String] = {
+        debug("Retrieving friends from URL: %s".format(url))
+        val friendsJson = call(url, x => JsonParser.parse(isToString(x)))
+        val data = (friendsJson \ "data")
+        val ids = data match {
+          case JArray(arr) => arr.map(_ \ "id").collect { case JString(s) => s }
+          case other => {
+            warn("Found wrong type for \"data\" Element: %s".format(other))
+            Seq()
+          }
+        }
+        val nextIds = (friendsJson \ "paging" \ "next") match {
+          case JString(url) => getFriends(url)
+          case JNothing => Seq()
+          case jvalue => {
+            warn("Friendlist contained unknown \"next\"-Element: %s".format(jvalue))
+            Seq()
+          }
+        }
+        ids ++ nextIds
+      }
+
+      val friendsUrl = "https://graph.facebook.com/me/friends?access_token=%s".format(accessToken)
+      user.facebookFriends = getFriends(friendsUrl).toSet
+
       if (user.save) {
         User.logUserIn(user)
       }

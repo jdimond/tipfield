@@ -34,6 +34,7 @@ class Boot extends Bootable with Logger {
       Menu(Loc("Home", List("index") -> false, S.?("home"), ifLoggedIn)),
       Menu(Loc("Schedule", List("schedule") -> false, S.?("schedule"), ifLoggedIn)),
       Menu(Loc("Standings", List("standings") -> false, S.?("standings"))),
+      Menu(Loc("My Pools", List("pools") -> false, S.?("my_pools"))),
       Menu(Loc("Admin", List("admin") -> false, S.?("admin"), ifAdmin)),
       Menu.i("login") / "login" >> Hidden
     )
@@ -63,6 +64,9 @@ class Boot extends Bootable with Logger {
          RewriteResponse("schedule" :: Nil, Map("matchday" -> matchday))
       case RewriteRequest(ParsePath(List("standings", group),_,_,_),_,_) =>
          RewriteResponse("standings" :: Nil, Map("group" -> group))
+      case RewriteRequest(ParsePath(List("pools", poolid),_,_,_),_,_) =>
+         RewriteResponse("pools" :: Nil, Map("poolid" -> poolid))
+
     }
 
     // Make sure ExtendedSession is used

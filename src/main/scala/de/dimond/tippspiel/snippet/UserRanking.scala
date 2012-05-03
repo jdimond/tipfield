@@ -10,9 +10,20 @@ import Helpers._
 import net.liftweb.mapper.By
 
 import de.dimond.tippspiel.model.PersistanceConfiguration._
+import model._
+
+object UserRanking {
+  def rankingTable(ranking: Seq[(Rank, User)]) = {
+    ".ranking_entry" #> { ranking.map { case (rank, user) => {
+      ".ranking_rank *" #> rank.is &
+      ".ranking_full_name *" #> user.fullName &
+      "img [src]" #> user.profilePictureUrl &
+      ".ranking_points *" #> user.points
+    }}}
+  }
+}
 
 class UserRanking {
-  import model._
   def global = {
     val ranking = User.userRanking(10)
     val rankingWithUser = User.currentUser match {
@@ -22,11 +33,6 @@ class UserRanking {
       }
       case _ => ranking
     }
-    ".leaderboard_entry" #> { rankingWithUser.map { case (rank, user) => {
-      ".leaderboard_rank *" #> rank &
-      ".full_name *" #> user.fullName &
-      "img [src]" #> user.profilePictureUrl &
-      ".leaderboard_points *" #> user.points
-    }}}
+    "" #> ""
   }
 }

@@ -1,6 +1,7 @@
 package de.dimond.tippspiel.model.mapper
 
 import de.dimond.tippspiel.model._
+import de.dimond.tippspiel.model.PersistanceConfiguration._
 
 import net.liftweb.mapper._
 import net.liftweb.common._
@@ -9,19 +10,80 @@ import org.scala_tools.time.Imports._
 import java.util.Date
 
 object DbUser extends DbUser with LongKeyedMetaMapper[DbUser] with MetaUser[DbUser] with Logger {
-  def create(fullName: String, fbId: String): User = {
+  override def create(fullName: String, fbId: String): User = {
+    if (count(By(_fbId, fbId)) > 0) {
+      throw new IllegalArgumentException("Can't readd user to database with same id!")
+    }
     val user: DbUser = DbUser.create
     user.fullName = fullName
     user.fbId = fbId
     user
   }
-  def findById(id: Long): Box[User] = find(By(_id, id))
-  def findByFbId(fbId: String): Box[User] = find(By(_fbId, fbId))
-  def userRanking(count: Int): Seq[(Option[Int], User)] = Seq()
-  def addPointsForUser(userId: Long, points: Int): Boolean = false
+  override def findById(id: Long): Box[User] = find(By(_id, id))
+  override def findByFbId(fbId: String): Box[User] = find(By(_fbId, fbId))
+  override def userRanking(count: Int): Seq[(Rank, User)] = Seq()
+  override def addPointsForUser(userId: Long, points: Int): Boolean = false
+
+  override def afterCreate = updateUserIdForFriends _ :: super.afterCreate
+
+  override def save(user: DbUser) = {
+    if (super.save(user)) {
+      updateFacebookFriends(user)
+    } else {
+      false
+    }
+  }
+
+  private def updateUserIdForFriends(user: DbUser): Unit = {
+    val allFriends = DbFriends.findAll(By(DbFriends.friendFacebookId, user.fbId))
+    for (friend <- allFriends) {
+      friend.friendUserId(user.id).save()
+    }
+  }
+
+  private def updateFacebookFriends(user: DbUser): Boolean = {
+    if (user._facebookFriendsDirty) {
+      user._facebookFriends match {
+        case Some(ids) => {
+          var success = true
+          val allForUser = DbFriends.findAll(By(DbFriends.userId, user.id))
+          /* validate/invalidate in the database */
+          for (friend <- allForUser) {
+            if (ids.contains(friend.friendFacebookId.is)) {
+              if (!friend.valid.is) {
+                success = success && friend.valid(true).save()
+              }
+            } else {
+              if (friend.valid.is) {
+                success = success && friend.valid(false).save()
+              }
+            }
+          }
+          /* create new friend links for new entries */
+          val oldIds = allForUser.map(_.friendFacebookId.is).toSet
+          val newIds = ids.filter(!oldIds.contains(_))
+          for (newId <- newIds) {
+            val friend = DbFriends.create
+            friend.userId(user.id)
+            friend.friendFacebookId(newId)
+            friend.valid(true)
+            User.findByFbId(newId) match {
+              case Full(u) => friend.friendUserId(u.id)
+              case _ => /* ignore */
+            }
+            success = success && friend.save()
+          }
+          success
+        }
+        case None => throw new IllegalStateException("This shouldn't happen!")
+      }
+    } else {
+      true
+    }
+  }
 }
 
-class DbUser extends User with LongKeyedMapper[DbUser] {
+class DbUser extends User with LongKeyedMapper[DbUser] with Logger {
   def getSingleton = DbUser
 
   protected object _id extends MappedLongIndex(this)
@@ -62,33 +124,31 @@ class DbUser extends User with LongKeyedMapper[DbUser] {
     }
   }
 
-  def id: Long = _id.is
+  override def id: Long = _id.is
 
-  def fullName: String = _fullName.is
-  def fullName_=(str: String) = _fullName(str)
-  def fbId: String = _fbId.is
-  def fbId_=(id: String) = _fbId(id)
+  override def fullName: String = _fullName.is
+  override def fullName_=(str: String) = _fullName(str)
+  override def fbId: String = _fbId.is
+  override def fbId_=(id: String) = _fbId(id)
 
-  //def save(): Boolean
+  override def isAdmin: Boolean = _admin.is
 
-  def isAdmin: Boolean = _admin.is
+  override def firstName = Some(_firstName.is)
+  override def firstName_=(firstName: Option[String]) = _firstName(firstName)
+  override def middleName = Some(_middleName.is)
+  override def middleName_=(middleName: Option[String]) = _middleName(middleName)
+  override def lastName = Some(_lastName.is)
+  override def lastName_=(lastName: Option[String]) = _lastName(lastName)
+  override def gender = Some(_gender.is)
+  override def gender_=(gender: Option[String]) = _gender(gender)
+  override def locale = Some(_locale.is)
+  override def locale_=(locale: Option[String]) = _locale(locale)
 
-  def firstName = Some(_firstName.is)
-  def firstName_=(firstName: Option[String]) = _firstName(firstName)
-  def middleName = Some(_middleName.is)
-  def middleName_=(middleName: Option[String]) = _middleName(middleName)
-  def lastName = Some(_lastName.is)
-  def lastName_=(lastName: Option[String]) = _lastName(lastName)
-  def gender = Some(_gender.is)
-  def gender_=(gender: Option[String]) = _gender(gender)
-  def locale = Some(_locale.is)
-  def locale_=(locale: Option[String]) = _locale(locale)
+  override def fbUserName= Some(_fbUserName.is)
+  override def fbUserName_=(fbUserName: Option[String]) = _fbUserName(fbUserName)
 
-  def fbUserName= Some(_fbUserName.is)
-  def fbUserName_=(fbUserName: Option[String]) = _fbUserName(fbUserName)
-
-  def fbAccessToken = Some(_fbAccessToken)
-  def setFbAccessToken(accessToken: Option[String], expiresAt: Option[DateTime]) = {
+  override def fbAccessToken = Some(_fbAccessToken)
+  override def setFbAccessToken(accessToken: Option[String], expiresAt: Option[DateTime]) = {
     accessToken match {
       case Some(a) => _fbAccessToken(a)
       case None => _fbAccessToken("")
@@ -98,11 +158,52 @@ class DbUser extends User with LongKeyedMapper[DbUser] {
       case None => _fbAccessTokenExpires(new Date())
     }
   }
-  def fbAccessTokenExpires = Some(new DateTime(_fbAccessTokenExpires.is))
+  override def fbAccessTokenExpires = Some(new DateTime(_fbAccessTokenExpires.is))
 
-  def fbTimeZone = Some(_fbTimeZone)
-  def fbTimeZone_=(fbTimeZone: Option[String]) = _fbTimeZone(fbTimeZone)
+  override def fbTimeZone = Some(_fbTimeZone)
+  override def fbTimeZone_=(fbTimeZone: Option[String]) = _fbTimeZone(fbTimeZone)
 
-  def points = _points.is
-  def ranking = Some(_ranking.is)
+  override def points = _points.is
+  override def ranking = Some(_ranking.is)
+
+  private var _facebookFriends: Option[Set[String]] = None
+  private var _facebookFriendsDirty = false
+
+  override def facebookFriends = _facebookFriends match {
+    case Some(friends) => friends
+    case None => {
+      val dbFriends = DbFriends.findAll(By(DbFriends.userId, this.id), By(DbFriends.valid, true))
+      val friendIds = dbFriends.map(_.friendFacebookId.is).toSet
+      _facebookFriends = Some(friendIds)
+      friendIds
+    }
+  }
+
+  override def facebookFriends_=(ids: Set[String]) = {
+    _facebookFriendsDirty = true
+    _facebookFriends = Some(ids)
+  }
+
+  override def friends: Set[Long] = {
+    val friends = DbFriends.findAll(By(DbFriends.userId, this.id), By_>(DbFriends.friendUserId, 0), By(DbFriends.valid,
+    true))
+    friends.map(_.friendUserId.is).toSet
+  }
+}
+
+object DbFriends extends DbFriends with LongKeyedMetaMapper[DbFriends]
+
+class DbFriends extends LongKeyedMapper[DbFriends] with IdPK {
+  def getSingleton = DbFriends
+
+  object userId extends MappedLong(this) {
+    override def dbIndexed_? = true
+  }
+  object friendFacebookId extends MappedString(this, 16) {
+    override def dbIndexed_? = true
+  }
+  object friendUserId extends MappedLong(this) {
+    override def dbIndexed_? = true
+  }
+  object valid extends MappedBoolean(this)
 }
