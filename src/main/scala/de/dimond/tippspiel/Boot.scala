@@ -34,7 +34,7 @@ class Boot extends Bootable with Logger {
       Menu(Loc("Home", List("index") -> false, S.?("home"), ifLoggedIn)),
       Menu(Loc("Schedule", List("schedule") -> false, S.?("schedule"), ifLoggedIn)),
       Menu(Loc("Standings", List("standings") -> false, S.?("standings"))),
-      Menu(Loc("My Pools", List("pools") -> false, S.?("my_pools"))),
+      Menu(Loc("My Pools", List("pools") -> false, S.?("my_pools"), ifLoggedIn)),
       Menu(Loc("Admin", List("admin") -> false, S.?("admin"), ifAdmin)),
       Menu.i("login") / "login" >> Hidden
     )
