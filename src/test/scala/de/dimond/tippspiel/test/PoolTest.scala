@@ -12,7 +12,7 @@ import de.dimond.tippspiel.model.PersistanceConfiguration._
 
 class PoolTest extends ModelSpec {
 
-  val defaultUser = User.create("Test User 1", "10011")
+  val defaultUser = User.create("Test User 1", "10031")
   defaultUser.save()
 
   "Pool" should "be created" in {
@@ -86,8 +86,8 @@ class PoolTest extends ModelSpec {
   "Invitations" should "appear in invitation list" in {
     val poolBox = Pool.newPool("Name", "Description", true, defaultUser)
     val pool = poolBox.open_!
-    pool.inviteUser("10031", None) should be (true)
-    val user = User.create("Test User 1", "10031")
+    pool.inviteUser("10030", None) should be (true)
+    val user = User.create("Test User 1", "10030")
     user.save() should be (true)
     Pool.invitationsForUser(user) should be (Set(pool))
   }
@@ -165,6 +165,48 @@ class PoolTest extends ModelSpec {
     val user = User.create("Test User 1", "70031")
     user.save() should be (true)
     pool.inviteUser("70031", None) should be (true)
+    Pool.invitationsForUser(user) should be (Set(pool))
+  }
+
+  "Invitations" should "work from one user for multiple recepients" in {
+    val poolBox = Pool.newPool("Name", "Description", true, defaultUser)
+    val pool = poolBox.open_!
+    val user = User.create("Test User 1", "80031")
+    user.save() should be (true)
+    pool.inviteUser("80032", Some(user))
+    pool.inviteUser("80033", Some(user))
+    pool.inviteUser("80034", Some(user))
+    pool.inviteUser("80035", Some(user))
+    pool.userIsInvited("80032") should be (true)
+    pool.userIsInvited("80033") should be (true)
+    pool.userIsInvited("80034") should be (true)
+    pool.userIsInvited("80035") should be (true)
+  }
+
+  "Invitations" should "disappear after user joined and left pool" in {
+    val poolBox = Pool.newPool("Name", "Description", true, defaultUser)
+    val pool = poolBox.open_!
+    val user = User.create("Test User 1", "90031")
+    user.save() should be (true)
+    pool.inviteUser(user.fbId, Some(defaultUser))
+    pool.addUser(user)
+    Pool.invitationsForUser(user) should be (Set())
+    pool.removeUser(user)
+    Pool.invitationsForUser(user) should be (Set())
+    Pool.invitationsForUser(user, true) should be (Set(pool))
+  }
+
+  "Invitations" should "still work after user left pool" in {
+    val poolBox = Pool.newPool("Name", "Description", true, defaultUser)
+    val pool = poolBox.open_!
+    val user = User.create("Test User 1", "100031")
+    user.save() should be (true)
+    pool.inviteUser(user.fbId, Some(defaultUser))
+    pool.addUser(user)
+    Pool.invitationsForUser(user) should be (Set())
+    pool.removeUser(user)
+    pool.inviteUser(user.fbId, Some(defaultUser))
+    pool.userIsInvited(user.fbId) should be (true)
     Pool.invitationsForUser(user) should be (Set(pool))
   }
 }

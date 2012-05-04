@@ -39,8 +39,9 @@ object DbPool extends DbPool with LongKeyedMetaMapper[DbPool] with MetaPool {
     if (withActive) {
       filtered.map(i => forId(i.pool.is)).flatten.toSet
     } else {
-      val allPoolIds = allForUser(user).map(_.id)
-      filtered.filter(i => !allPoolIds.contains(i.pool.is)).map(i => forId(i.pool.is)).flatten.toSet
+      val poolIds = DbPoolMembership.findAll(By(DbPoolMembership.userId, user.id),
+                                             By(DbPoolMembership.hasLeft, false)).map(_.pool.is)
+      filtered.filter(i => !poolIds.contains(i.pool.is)).map(i => forId(i.pool.is)).flatten.toSet
     }
   }
 }
@@ -63,7 +64,10 @@ class DbPool extends Pool with LongKeyedMapper[DbPool] with Logger {
 
   def removeUser(user: User): Boolean = {
     val pools = DbPoolMembership.findAll(By(DbPoolMembership.userId, user.id), By(DbPoolMembership.pool, this))
-    pools.map(_.hasLeft(true).save()).reduce(_ && _)
+    val successMembership = pools.map(_.hasLeft(true).save()).reduce(_ && _)
+    val invites = DbPoolInvites.findAll(By(DbPoolInvites.fbId, user.fbId), By(DbPoolInvites.pool, this))
+    val successInvites = invites.map(_.ignored(true).save()).reduce(_ && _)
+    return successInvites && successMembership
   }
 
   def addUser(user: User): Boolean = {
@@ -92,7 +96,9 @@ class DbPool extends Pool with LongKeyedMapper[DbPool] with Logger {
       case Some(user) => user.id
       case None => 0
     }
-    val inviteBox = DbPoolInvites.find(By(DbPoolInvites.pool, this), By(DbPoolInvites.invitingUserId, invitingUserId))
+    val inviteBox = DbPoolInvites.find(By(DbPoolInvites.pool, this),
+                                       By(DbPoolInvites.fbId, facebookId),
+                                       By(DbPoolInvites.invitingUserId, invitingUserId))
     val invite = inviteBox openOr DbPoolInvites.create
     invite.invitingUserId(invitingUserId)
     invite.fbId(facebookId)
