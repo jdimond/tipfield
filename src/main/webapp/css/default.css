@@ -1,6 +1,5 @@
 body {
   padding-top: 0px;
-  padding-bottom: 40px;
 }
 #header {
   background: url("/img/bg-header.gif") repeat-x scroll left top #262F35;
@@ -74,6 +73,21 @@ body {
 .container {
   margin-top: 20px;
 }
+.footer {
+  border-top: 1px solid #E5E5E5;
+  margin-top: 45px;
+  padding: 35px 0 36px;
+  font-size: 10px;
+  text-align: center;
+  color: #aaa;
+}
+.footer a {
+  color: #aaa;
+}
+.footer a:hover {
+  color: #777;
+}
+
 .goal_input {
   width: 20px;
 }

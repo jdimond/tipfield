@@ -36,7 +36,9 @@ class Boot extends Bootable with Logger {
       Menu(Loc("Standings", List("standings") -> false, S.?("standings"))),
       Menu(Loc("My Pools", List("pools") -> false, S.?("my_pools"), ifLoggedIn)),
       Menu(Loc("Admin", List("admin") -> false, S.?("admin"), ifAdmin)),
-      Menu.i("login") / "login" >> Hidden
+      Menu.i("login") / "login" >> Hidden,
+      Menu.i("aboutus") / "aboutus" >> Hidden,
+      Menu.i("privacypolicy") / "privacypolicy" >> Hidden
     )
 
     // set the sitemap.  Note if you don't want access control for
