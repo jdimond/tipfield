@@ -20,7 +20,7 @@ import de.dimond.tippspiel.model._
 class Standings {
   import scala.xml.Text
 
-  def teamHtml(team: Team) = Seq(<img src={"/images/flags/" + team.emblemUrl} />, Text(team.toString()))
+  def teamHtml(team: Team) = Seq(<img src={"/images/flags/" + team.emblemUrl} />, Text(team.localizedName))
 
   def standings = {
     val currentGroupName = S.param("group") openOr Group.all.head.name

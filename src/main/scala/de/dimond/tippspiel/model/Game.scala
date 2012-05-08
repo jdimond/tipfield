@@ -18,12 +18,12 @@ case class Game(id: Int, teamHome: TeamReference, teamAway: TeamReference, date:
 }
 
 case class Location(location: String) {
-  override def toString() = S.?(location)
+  def localizedName = S.?(location)
 }
 
 case class Team(name: String, emblemUrl: String, uefaCoefficient: Int) {
   def reference = DirectTeamReference(this)
-  override def toString() = S.?(name)
+  def localizedName = S.?(name)
 }
 
 sealed trait TeamReference {
@@ -35,7 +35,7 @@ sealed trait TeamReference {
   def teamAvailable = team isRight
   def asString = team match {
     case Left((str, id)) => S.?(str).format(id)
-    case Right(team) => team.toString()
+    case Right(team) => team.localizedName
   }
 }
 
@@ -81,5 +81,5 @@ object MatchDay {
 case class MatchDay(id: String, name: String, games: Seq[Game]) {
   lazy val firstDate = games.map(_.date).min
   lazy val lastDate = games.map(_.date).max
-  override def toString() = S.?(name)
+  def localizedName = S.?(name)
 }
