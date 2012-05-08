@@ -110,6 +110,9 @@ body {
 }
 #matchday_select {
 }
+#standing_team img {
+	margin-right: 5px;
+}
 .spinner {
   display: block;
 }
