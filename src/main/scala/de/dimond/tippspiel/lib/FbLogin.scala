@@ -32,11 +32,13 @@ object FbLogin {
 
   object csrfSessionCode extends SessionVar[Box[String]](Empty)
 
+  def fullRedirectUri = "%s%s".format(S.hostAndPath, redirectUri)
+
   def authorize(req: Req): Box[LiftResponse] = {
     val code = UUID.randomUUID().toString()
     csrfSessionCode.set(Full(code))
     val dialogUrl = ("https://www.facebook.com/dialog/oauth?client_id=%s&redirect_uri=%s" +
-                    "&state=%s").format(appId, redirectUri, code)
+                    "&state=%s").format(appId, fullRedirectUri, code)
     Full(RedirectResponse(dialogUrl, req))
   }
 
@@ -75,7 +77,7 @@ object FbLogin {
     if (sessionCode.length > 0 && sessionCode.equals(requestCode)) {
       val accessCode = req.param("code").openOr("")
       val tokenUrl = ("https://graph.facebook.com/oauth/access_token?client_id=%s&redirect_uri=%s" +
-                      "&client_secret=%s&code=%s").format(appId, redirectUri, appSecret, accessCode)
+                      "&client_secret=%s&code=%s").format(appId, fullRedirectUri, appSecret, accessCode)
       val values = call(tokenUrl, x => queryParams(isToString(x)))
       val accessToken = (values.getOrElse("access_token", Nil) ::: List("")).head
       val expires = (values.getOrElse("expires", Nil) ::: List("0")).head
@@ -140,7 +142,7 @@ object FbLogin {
 
       S.redirectTo("/")
     } else {
-      error("State doesn't match. You are probably a victim of CSRF" + sessionCode + "/" + requestCode)
+      error("State doesn't match. You are probably a victim of CSRF")
     }
   }
 
