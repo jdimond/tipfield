@@ -23,6 +23,7 @@ trait Pool {
 
   def userHasLeftGroup(userId: Long): Box[Boolean]
   def inviteUser(facebookId: String, fromUser: Option[User]): Boolean
+  def userIsAllowedToInvite(user: User): Boolean
   def userIsInvited(facebookId: String): Boolean
   def ignoreInvitations(user: User): Unit
 }

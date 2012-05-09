@@ -91,9 +91,16 @@ class DbPool extends Pool with LongKeyedMapper[DbPool] with Logger {
     DbPoolMembership.find(By(DbPoolMembership.pool, this), By(DbPoolMembership.userId, userId)).map(_.hasLeft.is)
   }
 
+  override def userIsAllowedToInvite(user: User) = _allowMemberInvite.is || (user.id == _adminId.is)
+
   override def inviteUser(facebookId: String, fromUser: Option[User]) = {
     val invitingUserId = fromUser match {
-      case Some(user) => user.id
+      case Some(user) => {
+        if (!userIsAllowedToInvite(user)) {
+          throw new IllegalArgumentException("Inviting user is not allowed to make invitations!")
+        }
+        user.id
+      }
       case None => 0
     }
     val inviteBox = DbPoolInvites.find(By(DbPoolInvites.pool, this),

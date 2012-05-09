@@ -43,6 +43,7 @@ class Pools {
 
     def userHasLeftGroup(userId: Long) = Full(false)
     def inviteUser(facebookId: String, fromUser: Option[User]) = throw new RuntimeException("Not supported")
+    def userIsAllowedToInvite(user: User) = false
     def userIsInvited(facebookId: String) = false
     def ignoreInvitations(user: User) = throw new RuntimeException("Not supported")
   }
@@ -130,13 +131,17 @@ class Pools {
   }
 
   def inviteFriendsButton = {
-    val ajaxCall = SHtml.jsonCall(JsRaw("response"), ajaxFriendsButtonResponseHandler)
-    "#invite_friends_button [onclick]" #> {
-      "FB.ui({method: 'apprequests', message: '%s'}, function(response) { %s });".format(
-        "Invitation to Tippspiel", // TODO: make sure it is escaped correctly
-        ajaxCall._2.toJsCmd
-      )
-      //"(function(response) { " + ajaxCall._2.toJsCmd + "})({ request: '123235346', to: ['1234', '2345'] });"
+    if (currentPool.userIsAllowedToInvite(user)) {
+      val ajaxCall = SHtml.jsonCall(JsRaw("response"), ajaxFriendsButtonResponseHandler)
+      "#invite_friends_button [onclick]" #> {
+        "FB.ui({method: 'apprequests', message: '%s'}, function(response) { %s });".format(
+          "Invitation to Tippspiel", // TODO: make sure it is escaped correctly
+          ajaxCall._2.toJsCmd
+        )
+        //"(function(response) { " + ajaxCall._2.toJsCmd + "})({ request: '123235346', to: ['1234', '2345'] });"
+      }
+    } else {
+      "#invite_friends_section" #> ""
     }
   }
 
