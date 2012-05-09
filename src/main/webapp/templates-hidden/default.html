@@ -26,11 +26,25 @@
           <span><a href="/"><img alt="" src="/images/logo.png"></a></span>
         </div>
         <div id="userbox" class="lift:LoginButton">
-          <img height="38px" width="38px" alt="Avatar" src="https://graph.facebook.com/jonathan.dimond/picture" />
-          <p>
+          <img id="user_img" height="38px" width="38px" alt="Avatar" src="https://graph.facebook.com/jonathan.dimond/picture" />
+          <div id="userbox_div">
             <strong id="user_name">Jonathan Dimond</strong><br>
             <a href="/logout" id="login_link"></a>
-          </p>
+	          <div class="btn-group selection_row" id="lang_select">
+	            <a id="current_lang" class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+	              <img id="current_lang_flag" src="/images/flags/germany.png" />
+	              <span class="caret"></span>
+	            </a>
+	            <ul class="dropdown-menu" id="lang_list">
+	              <li class="lang_element">
+	                <form method="POST">
+	                  <input type="hidden" class="lang_code" name="locale" value="de_DE" />
+	                  <input type="image" class="lang_flag" src="/images/flags/germany.png" />
+	                </form>
+	              </li>
+	            </ul>
+	          </div>
+          </div>
         </div>
       </div>
     </div>

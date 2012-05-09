@@ -1,6 +1,7 @@
 package de.dimond.tippspiel
 
 import net.liftweb._
+import net.liftweb.http.provider.{HTTPRequest,HTTPCookie}
 import net.liftweb.util._
 import Helpers._
 
@@ -12,9 +13,9 @@ import Loc._
 import de.dimond.tippspiel.model._
 import de.dimond.tippspiel.lib._
 import de.dimond.tippspiel.model.PersistanceConfiguration._
-import java.util.Locale
-import net.liftweb.http.provider.HTTPRequest
 import de.dimond.tippspiel.util.Util
+
+import java.util.Locale
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -93,35 +94,46 @@ class Boot extends Bootable with Logger {
     LiftRules.htmlProperties.default.set((r: Req) =>
       new Html5Properties(r.userAgent))
 
-    // Use our own Locale calculation method and resources
-    LiftRules.localeCalculator = localeCalculator _
-    LiftRules.resourceNames = "i18n/messages" :: LiftRules.resourceNames
-
     GameData.init(Props.testMode || Props.devMode)
     SpecialData.init(Props.testMode || Props.devMode)
 
     PersistanceConfiguration.initialize()
   }
 
-  /** Determine user locale to serve site in right language:
-   * - Logged in: Fb locale
-   * - Logged out: Browser locale
-   */
-  def localeCalculator(request : Box[HTTPRequest]): Locale = User.currentUser match {
-    case Full(user) => user.locale.map(Util.localeFromString(_)).getOrElse(calculateLocaleFromRequest(request))
-    case _ => calculateLocaleFromRequest(request)
+  // Determine user locale to serve site in right language
+  // Properly convert a language tag to a Locale
+  def computeLocale(tag : String) = tag.split(Array('-', '_')) match {
+    case Array(lang) => new Locale(lang)
+    case Array(lang, country) => new Locale(lang, country)
+    case Array(lang, country, variant) => new Locale(lang, country, variant)
   }
 
-  private def calculateLocaleFromRequest(request: Box[HTTPRequest]): Locale = {
-    request.flatMap(r => {
-      def calcLocale: Box[Locale] = Full(LiftRules.defaultLocaleCalculator(request))
+  val localeCookieName = "locale"
+
+  // Use our own Locale calculation method using cookie or browser locale
+  LiftRules.localeCalculator = {
+    case fullReq @ Full(req) => {
+      // Check against a set cookie, or the locale sent in the request
+      def currentLocale : Locale =
+        S.findCookie(localeCookieName).flatMap {
+          cookie => cookie.value.map(computeLocale)
+        } openOr LiftRules.defaultLocaleCalculator(fullReq)
+
+      // Check to see if the user explicitly requests a new locale
       S.param("locale") match {
-        case Full(null) => calcLocale
-        case f@Full(selectedLocale) => tryo(Util.localeFromString(selectedLocale))
-        case _ => calcLocale
+        case Full(requestedLocale) if requestedLocale != null => {
+          val computedLocale = computeLocale(requestedLocale)
+          S.addCookie(HTTPCookie(localeCookieName, Full(requestedLocale), Full(S.hostName),
+              Full(S.contextPath), Full(3600*24*365), Empty, Empty))
+          computedLocale
+        }
+        case _ => currentLocale
       }
-    }).openOr(Locale.getDefault())
+    }
+    case _ => Locale.getDefault
   }
 
+  // Use own internationalization resources
+  LiftRules.resourceNames = "i18n/messages" :: LiftRules.resourceNames
 }
 
