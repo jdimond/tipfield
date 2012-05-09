@@ -11,7 +11,8 @@ import de.dimond.tippspiel.model.mapper._
 object PersistanceConfiguration extends Logger {
   private var _initialized = false
   private val tables: Seq[MetaMapper[_]] = Seq(DbResult, DbUser, DbTip, DbExtendedSession,
-                                               DbPool, DbPoolMembership, DbFriends, DbPoolInvites)
+                                               DbPool, DbPoolMembership, DbFriends, DbPoolInvites,
+                                               DbSpecialTip)
 
   def initialized = _initialized
   def initialize() = {
@@ -33,12 +34,14 @@ object PersistanceConfiguration extends Logger {
       Schemifier.destroyTables_!!(Schemifier.infoF _, tables: _*)
     }
     Schemifier.schemify(true, Schemifier.infoF _, tables: _*)
-    DB.addLogFunc {
-      case (query, time) => {
-        debug("All queries took " + time + "ms: ")
-        query.allEntries.foreach({ case DBLogEntry(stmt, duration) =>
-          debug(stmt + " took " + duration + "ms")})
-        debug("End queries")
+    if (!Props.productionMode) {
+      DB.addLogFunc {
+        case (query, time) => {
+          debug("All queries took " + time + "ms: ")
+          query.allEntries.foreach({ case DBLogEntry(stmt, duration) =>
+            debug(stmt + " took " + duration + "ms")})
+          debug("End queries")
+        }
       }
     }
   }
@@ -52,4 +55,5 @@ object PersistanceConfiguration extends Logger {
   def Tip: MetaTip = DbTip
   def ExtendedSession: ExtendedSession = DbExtendedSession
   def Pool: MetaPool = DbPool
+  def SpecialTip: MetaSpecialTip = DbSpecialTip
 }

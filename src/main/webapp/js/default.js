@@ -8,3 +8,13 @@ $(document).ready(function() {
     });
   });
 });
+
+function toggleShowing(toHide, toShow, doAfter) {
+  if (toHide) {
+    $('#' + toHide).hide();
+  }
+  if (toShow) {
+    $('#' + toShow).show();
+  }
+  doAfter();
+}

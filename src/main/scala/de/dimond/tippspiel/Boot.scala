@@ -32,9 +32,10 @@ class Boot extends Bootable with Logger {
     val entries = List(
       //Menu.i("Home") / "index", // the simple way to declare a menu
       Menu(Loc("Home", List("index") -> false, S.?("home"), ifLoggedIn)),
+      Menu(Loc("My Tips", List("tips") -> false, S.?("my_tips"), ifLoggedIn)),
+      Menu(Loc("My Pools", List("pools") -> false, S.?("my_pools"), ifLoggedIn)),
       Menu(Loc("Schedule", List("schedule") -> false, S.?("schedule"), ifLoggedIn)),
       Menu(Loc("Standings", List("standings") -> false, S.?("standings"))),
-      Menu(Loc("My Pools", List("pools") -> false, S.?("my_pools"), ifLoggedIn)),
       Menu(Loc("Admin", List("admin") -> false, S.?("admin"), ifAdmin)),
       Menu.i("login") / "login" >> Hidden,
       Menu.i("aboutus") / "aboutus" >> Hidden,
@@ -97,6 +98,7 @@ class Boot extends Bootable with Logger {
     LiftRules.resourceNames = "i18n/messages" :: LiftRules.resourceNames
 
     GameData.init(Props.testMode || Props.devMode)
+    SpecialData.init(Props.testMode || Props.devMode)
 
     PersistanceConfiguration.initialize()
   }
