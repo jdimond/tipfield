@@ -17,7 +17,7 @@ import de.dimond.tippspiel.util._
 import de.dimond.tippspiel.model._
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 
-class Canvas {
+class Canvas extends Logger {
   def error(errorStr: String) = "*" #> errorStr
 
   def canvasHandler = {

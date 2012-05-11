@@ -27,7 +27,7 @@ object PoolName extends RequestVar("")
 object PoolDescription extends RequestVar("")
 object AllowMemberInvite extends RequestVar(true)
 
-class Pools {
+class Pools extends Logger {
   val user = User.currentUser open_!
 
   def linkForPool(pool: Pool) = pool match {
@@ -113,13 +113,13 @@ class Pools {
             }
           }
           case other => {
-            debug("Wrong type: %s".format(other))
+            warn("Wrong type: %s".format(other))
             _Noop
           }
         }
       }
       case other => {
-        debug("Not a JSON: %s".format(other))
+        warn("Not a JSON: %s".format(other))
         _Noop
       }
     }

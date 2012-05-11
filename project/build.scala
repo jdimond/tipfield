@@ -38,15 +38,15 @@ object LiftProjectBuild extends Build {
         "net.liftweb" %% "lift-mapper" % liftVersion % "compile",
         "net.liftweb" %% "lift-json" % liftVersion % "compile",
         "org.mortbay.jetty" % "jetty" % "6.1.22" % "container",
-        "ch.qos.logback" % "logback-classic" % "1.0.0" % "compile",
+        "ch.qos.logback" % "logback-classic" % "1.0.3" % "compile",
         "org.scalatest" %% "scalatest" % "1.6.1" % "test",
         "junit" % "junit" % "4.10" % "test",
-        "org.scala-tools.time" % "time_2.9.1" % "0.5",
-        "joda-time" % "joda-time" % "2.0",
-        "org.joda" % "joda-convert" % "1.1",
+        "org.scala-tools.time" % "time_2.9.1" % "0.5" % "compile",
+        "joda-time" % "joda-time" % "2.0" % "compile",
+        "org.joda" % "joda-convert" % "1.1" % "compile",
         //"net.debasishg" % "redisclient_2.9.0" % "2.3.1",
-        "net.fyrie" % "fyrie-redis_2.9.1" % "2.0-SNAPSHOT",
-        "postgresql" % "postgresql" % "8.4-702.jdbc4"
+        //"net.fyrie" % "fyrie-redis_2.9.1" % "2.0-SNAPSHOT",
+        "postgresql" % "postgresql" % "8.4-702.jdbc4" % "compile"
       )
     },
 

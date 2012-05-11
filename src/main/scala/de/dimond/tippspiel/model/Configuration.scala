@@ -8,11 +8,13 @@ import net.liftweb.util.Props
 
 import de.dimond.tippspiel.model.mapper._
 
-object PersistanceConfiguration extends Logger {
+object PersistanceConfiguration {
   private var _initialized = false
   private val tables: Seq[MetaMapper[_]] = Seq(DbResult, DbUser, DbTip, DbExtendedSession,
                                                DbPool, DbPoolMembership, DbFriends, DbPoolInvites,
                                                DbSpecialTip, DbFacebookRequests)
+
+  private val logger = Logger(PersistanceConfiguration.getClass)
 
   def initialized = _initialized
   def initialize() = {
@@ -27,7 +29,7 @@ object PersistanceConfiguration extends Logger {
     }
     val dbVendor = new StandardDBVendor(Props get "db.driver" openOr "org.postgresql.Driver",
                                         Props get "db.url" openOr database,
-                                        Empty, Empty)
+                                        Props get "db.username", Props get "db.password")
     DB.defineConnectionManager(DefaultConnectionIdentifier, dbVendor)
 
     if (Props.testMode) {
@@ -37,10 +39,10 @@ object PersistanceConfiguration extends Logger {
     if (!Props.productionMode) {
       DB.addLogFunc {
         case (query, time) => {
-          debug("All queries took " + time + "ms: ")
+          logger.debug("All queries took " + time + "ms: ")
           query.allEntries.foreach({ case DBLogEntry(stmt, duration) =>
-            debug(stmt + " took " + duration + "ms")})
-          debug("End queries")
+            logger.debug(stmt + " took " + duration + "ms")})
+          logger.debug("End queries")
         }
       }
     }

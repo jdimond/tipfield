@@ -17,7 +17,7 @@ import de.dimond.tippspiel.model._
 import de.dimond.tippspiel.util._
 import de.dimond.tippspiel.util.Util._
 
-object FacebookRequestDeleter extends Actor {
+object FacebookRequestDeleter extends Actor with Logger {
   def act = loop {
     react {
       case (user: User, idsAny: Seq[_]) => {
@@ -58,7 +58,7 @@ case class FbUser(id: String,
                   locale: Option[String],
                   timezone: Option[String])
 
-class FacebookApi(val secret: String) {
+class FacebookApi(val secret: String) extends Logger {
   import javax.crypto.Mac
   import javax.crypto.spec.SecretKeySpec
 
