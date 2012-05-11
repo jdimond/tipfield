@@ -28,12 +28,11 @@ class LoginButton {
       "#user_name *" #> S.?("login")
     }
   }) &
-  "#current_lang_flag [src]" #> ("images/flags/" + S.?("flag_image")) &
+  "#current_lang_flag [src]" #> ("/images/flags/" + S.?("flag_image")) &
   ".lang_element" #> (Languages.supportedLanguages
       filter(S.locale.getLanguage() != _.locale.getLanguage())
       map { lang =>
         ".lang_code [value]" #> lang.locale.toString &
-        ".lang_link [href]" #> ("/?locale=" + lang.locale.toString) &
-        ".lang_flag [src]" #> ("images/flags/" + lang.flag)
+        ".lang_flag [src]" #> ("/images/flags/" + lang.flag)
   })
 }

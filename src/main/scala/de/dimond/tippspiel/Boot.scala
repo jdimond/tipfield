@@ -125,7 +125,7 @@ class Boot extends Bootable with Logger {
         case Full(requestedLocale) if requestedLocale != null => {
           val computedLocale = computeLocale(requestedLocale)
           S.addCookie(HTTPCookie(localeCookieName, Full(requestedLocale), Full(S.hostName),
-              Full(S.contextPath), Full(3600*24*365), Empty, Empty))
+              Full("/"), Full(3600*24*365), Empty, Empty))
           computedLocale
         }
         case _ => currentLocale
