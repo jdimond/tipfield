@@ -13,12 +13,15 @@ import net.liftweb.http.js.jquery._
 import Helpers._
 import net.liftweb.mapper.By
 
+import scala.actors.Actor
+
 import org.scala_tools.time.Imports._
 
 import de.dimond.tippspiel._
 import de.dimond.tippspiel.model._
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 import de.dimond.tippspiel.util._
+import de.dimond.tippspiel.lib._
 
 object PoolName extends RequestVar("")
 object PoolDescription extends RequestVar("")
@@ -30,22 +33,6 @@ class Pools {
   def linkForPool(pool: Pool) = pool match {
     case FacebookPool => "/pools"
     case p => "/pools/%d".format(p.id)
-  }
-
-  case object FacebookPool extends Pool {
-    def id = 0
-    def name = ?("facebook_friends")
-    def description = ""
-    def users = user.friends + user.id
-    def adminId = 0
-    def removeUser(user: User) = throw new RuntimeException("Not supported")
-    def addUser(user: User) = throw new RuntimeException("Not supported")
-
-    def userHasLeftGroup(userId: Long) = Full(false)
-    def inviteUser(facebookId: String, fromUser: Option[User]) = throw new RuntimeException("Not supported")
-    def userIsAllowedToInvite(user: User) = false
-    def userIsInvited(facebookId: String) = false
-    def ignoreInvitations(user: User) = throw new RuntimeException("Not supported")
   }
 
   def pools = Seq(FacebookPool) ++ Pool.allForUser(user).toSeq.sortBy(_.name)
@@ -64,12 +51,15 @@ class Pools {
     case _ => FacebookPool
   }
 
-  def poolRanking = {
-    val users = for {
+  lazy val poolUsers = {
+    for {
       userId <- currentPool.users.toSeq
       user <- User.findById(userId)
     } yield user
-    UserRanking.rankingTable(User.rankUsers(users))
+  }
+
+  def poolRanking = {
+    UserRanking.rankingTable(User.rankUsers(poolUsers))
   }
 
   def createPoolForm = {
@@ -82,6 +72,7 @@ class Pools {
             PoolName.remove()
             PoolDescription.remove()
             AllowMemberInvite.remove()
+            S.redirectTo(linkForPool(pool))
           }
           case _ => S.error("There was an unexpected error")
         }
@@ -97,20 +88,24 @@ class Pools {
 
   def poolList = ".pool_entry" #> (pools map { pool =>
     ".pool_link [href]" #> linkForPool(pool) &
-    ".pool_button *" #> pool.name
+    ".pool_button *" #> (if (currentPool.id == pool.id) <b>{pool.name}</b> else <span>{pool.name}</span>) &
+    ".pool_button [class+]" #> (if (currentPool.id == pool.id) "btn-inverse" else "")
   })
 
   def ajaxFriendsButtonResponseHandler(response: Any): JsCmd = {
     Full(response).asA[Map[String, Any]] match {
       case Full(r) => {
         (r.get("request"), r.get("to")) match {
-          case (Some(rid), Some(ids: Seq[_])) => {
+          case (Some(rid: String), Some(ids: Seq[_])) => {
+            val strIds = ids.collect { case str: String => str }
+            for (strId <- strIds) {
+              FacebookRequests.saveRequestForUser(user, strId, rid, currentPool.id)
+            }
             currentPool match {
               case FacebookPool => {
                 debug("Invited to facebook pool: %s".format(currentPool))
               }
               case realPool => {
-                val strIds = ids.collect { case str: String => str }
                 strIds.map(realPool.inviteUser(_, Some(user)))
                 debug("Added following invites: %s".format(strIds))
                 _Noop /* TODO: inform user */
@@ -133,12 +128,13 @@ class Pools {
   def inviteFriendsButton = {
     if (currentPool.userIsAllowedToInvite(user)) {
       val ajaxCall = SHtml.jsonCall(JsRaw("response"), ajaxFriendsButtonResponseHandler)
+      val excludeIds = "[%s]".format(poolUsers.map(u => encJs(u.fbId)).mkString(", "))
       "#invite_friends_button [onclick]" #> {
-        "FB.ui({method: 'apprequests', message: '%s'}, function(response) { %s });".format(
-          "Invitation to Tippspiel", // TODO: make sure it is escaped correctly
+        "FB.ui({method: 'apprequests', message: %s, exclude_ids: %s}, function(response) { %s });".format(
+          encJs("Invitation to Tippspiel"),
+          excludeIds,
           ajaxCall._2.toJsCmd
         )
-        //"(function(response) { " + ajaxCall._2.toJsCmd + "})({ request: '123235346', to: ['1234', '2345'] });"
       }
     } else {
       "#invite_friends_section" #> ""
@@ -148,19 +144,29 @@ class Pools {
   def leavePoolButton = {
     currentPool match {
       case FacebookPool => {
-        "#leave_pool_button" #> ""
+        "#leave_pool" #> ""
       }
       case p: Pool => {
         def process() = {
           p.removeUser(user)
         }
-        "name=process" #> SHtml.hidden(process)
+        "name=process" #> SHtml.hidden(process) &
+        "#leave_pool_button [onclick]" #> {
+          "if (confirm('Really leave pool')) { $('#leave_pool_form').submit(); }" // TODO: language
+        }
       }
     }
   }
 
+  def checkInvitationRequests(invitations: Set[Pool]) = {
+    val openPools = invitations.map(_.id)
+    val toDelete = FacebookRequests.getRequests(user.fbId).filter(req => !openPools.contains(req.poolId))
+    if (toDelete.size > 0) FacebookRequestDeleter ! (user, toDelete)
+  }
+
   def invitations = {
     val invitations = Pool.invitationsForUser(user)
+    checkInvitationRequests(invitations)
     if(invitations.size > 0) {
       "#pool_invitations" #> {
         invitations map { pool =>
@@ -168,10 +174,12 @@ class Pools {
           ".invitation_entry [id]" #> id &
           ".pool_name *" #> pool.name &
           ".join_link *" #> { body => SHtml.a(() => {
+            FacebookRequestDeleter ! (user, FacebookRequests.getRequests(user.fbId, pool.id))
             pool.addUser(user)
             S.redirectTo(linkForPool(pool))
           }, body) } &
           ".ignore_link *" #> { body => SHtml.a(() => {
+            FacebookRequestDeleter ! (user, FacebookRequests.getRequests(user.fbId, pool.id))
             pool.ignoreInvitations(user)
             JqJsCmds.FadeOut(id, TimeSpan(0), TimeSpan(700))
           }, body) }
@@ -183,4 +191,5 @@ class Pools {
   }
 
   def poolName = "* *" #> currentPool.name
+  def poolDescription = "* *" #> currentPool.description
 }

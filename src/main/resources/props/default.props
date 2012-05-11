@@ -1,3 +1,4 @@
 fb.AppId=132919923500227
 fb.AppSecret=
 fb.CallbackUrl=/facebook/callback
+fb.AppUrl=https://apps.facebook.com/tipfield/

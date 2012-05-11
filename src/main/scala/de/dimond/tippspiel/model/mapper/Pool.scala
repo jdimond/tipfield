@@ -145,4 +145,3 @@ class DbPoolInvites extends LongKeyedMapper[DbPoolInvites] with IdPK {
   object pool extends MappedLongForeignKey(this, DbPool)
   object ignored extends MappedBoolean(this)
 }
-

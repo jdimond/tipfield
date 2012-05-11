@@ -12,7 +12,7 @@ object PersistanceConfiguration extends Logger {
   private var _initialized = false
   private val tables: Seq[MetaMapper[_]] = Seq(DbResult, DbUser, DbTip, DbExtendedSession,
                                                DbPool, DbPoolMembership, DbFriends, DbPoolInvites,
-                                               DbSpecialTip)
+                                               DbSpecialTip, DbFacebookRequests)
 
   def initialized = _initialized
   def initialize() = {
@@ -56,4 +56,5 @@ object PersistanceConfiguration extends Logger {
   def ExtendedSession: ExtendedSession = DbExtendedSession
   def Pool: MetaPool = DbPool
   def SpecialTip: MetaSpecialTip = DbSpecialTip
+  def FacebookRequests: MetaFacebookRequests = DbFacebookRequests
 }

@@ -12,6 +12,9 @@ object DbTip extends DbTip with LongKeyedMetaMapper[DbTip] with MetaTip {
   def updatePoints(result: Result): Boolean = false
   def forUserAndGame(user: User, game: Game): Box[Tip] = find(By(_userId, user.id), By(_gameId, game.id))
   def saveForUserAndGame(user: User, game: Game, goalsHome: Int, goalsAway: Int): Boolean = {
+    if (DateTime.now > game.date) {
+      return false
+    }
     val tip = find(By(_userId, user.id), By(_gameId, game.id)) openOr DbTip.create._userId(user.id)._gameId(game.id)
     tip._goalsHome(goalsHome)
     tip._goalsAway(goalsAway)

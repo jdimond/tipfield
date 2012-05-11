@@ -39,8 +39,12 @@ object SpecialSnippet {
     def saveTip(idStr: String) = {
       try {
         val id = idStr.toInt
-        if (SpecialTip.saveForUser(user, special, id)) {
-          success
+        if (id >= 0 && id < special.answers.length && DateTime.now < special.finalAnswerTime) {
+          if (SpecialTip.saveForUser(user, special, id)) {
+            success
+          } else {
+            failure
+          }
         } else {
           failure
         }

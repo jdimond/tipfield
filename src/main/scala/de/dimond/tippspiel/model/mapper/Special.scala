@@ -12,6 +12,9 @@ object DbSpecialTip extends DbSpecialTip with LongKeyedMetaMapper[DbSpecialTip] 
   def updatePoints(special: Special, finalAnswerId: Int): Boolean = false
   def answerForUser(user: User, special: Special) = find(By(_userId, user.id), By(_specialId, special.id))
   def saveForUser(user: User, special: Special, answerId: Int): Boolean = {
+    if (DateTime.now > special.finalAnswerTime) {
+      return false
+    }
     val box = find(By(_userId, user.id), By(_specialId, special.id))
     val specialAnswer = box openOr DbSpecialTip.create._userId(user.id)._specialId(special.id)
     specialAnswer._answerId(answerId)
