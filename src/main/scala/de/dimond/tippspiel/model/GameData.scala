@@ -57,7 +57,7 @@ object GameData {
     val game04 = Game(4, germany.reference, portugal.reference, createDateTime(2012, 6, 9, 21, 45, utc3), lviv)
     val game05 = Game(5, spain.reference, italy.reference, createDateTime(2012, 6, 10, 18, 00, utc2), gdansk)
     val game06 = Game(6, ireland.reference, croatia.reference, createDateTime(2012, 6, 10, 20, 45, utc2), poznan)
-    val game07 = Game(7, france.reference, england.reference, createDateTime(2012, 6, 11, 19, 45, utc3), donetsk)
+    val game07 = Game(7, france.reference, england.reference, createDateTime(2012, 6, 11, 19, 00, utc3), donetsk)
     val game08 = Game(8, ukraine.reference, sweden.reference, createDateTime(2012, 6, 11, 21, 45, utc3), kiev)
 
     val game09 = Game(9, greece.reference, czechRepublic.reference, createDateTime(2012, 6, 12, 18, 00, utc2), wroclaw)
@@ -66,7 +66,7 @@ object GameData {
     val game12 = Game(12, netherlands.reference, germany.reference, createDateTime(2012, 6, 13, 21, 45, utc3), kharkiv)
     val game13 = Game(13, italy.reference, croatia.reference, createDateTime(2012, 6, 14, 18, 00, utc2), poznan)
     val game14 = Game(14, spain.reference, ireland.reference, createDateTime(2012, 6, 14, 20, 45, utc2), gdansk)
-    val game15 = Game(15, ukraine.reference, france.reference, createDateTime(2012, 6, 15, 19, 45, utc3), donetsk)
+    val game15 = Game(15, ukraine.reference, france.reference, createDateTime(2012, 6, 15, 19, 00, utc3), donetsk)
     val game16 = Game(16, sweden.reference, england.reference, createDateTime(2012, 6, 15, 21, 45, utc3), kiev)
 
     val game17 = Game(17, czechRepublic.reference, poland.reference, createDateTime(2012, 6, 16, 20, 45, utc2), wroclaw)
