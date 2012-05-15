@@ -119,8 +119,8 @@ class Pools extends Logger {
         }
       }
       case other => {
-        warn("Not a JSON: %s".format(other))
-        failure
+        /* cancelled */
+        Noop
       }
     }
   }
