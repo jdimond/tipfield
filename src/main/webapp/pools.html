@@ -13,7 +13,7 @@
         <div class="span3">
           <div class="well">
             <div class="lift:Pools.invitations" id="pool_invitations">
-              <h3><span class="lift:loc.invitations">Invitations</span></h3>
+              <h3><span class="lift:loc.invitations">Invitations</span></h3><br />
               <table class="full_width">
                 <tr class="invitation_entry">
                   <td width="100%" class="pool_name">New Pool</td>
@@ -37,7 +37,7 @@
             </div>
 
             <div class="lift:Pools.poolList">
-              <h3><span class="lift:loc.my_pools">My Pools</span></h3>
+              <h3><span class="lift:loc.my_pools">My Pools</span></h3><br />
               <p class="pool_entry">
                 <a class="pool_link" href="#">
                   <button type="submit" class="btn pool_button full_width"></button>
@@ -46,7 +46,7 @@
               <br />
             </div>
 
-            <h3><span class="lift:loc.new_pool">New Pool</span></h3>
+            <h3><span class="lift:loc.new_pool">New Pool</span></h3><br />
             <form class="form-horizontal lift:Pools.createPoolForm" id="create_pool_form" method="POST">
               <input type="hidden" name="process" />
               <fieldset class="control-group" id="pool_name_group">
@@ -77,8 +77,8 @@
             <thead>
               <tr>
                 <th>#</th>
-                <th>Name</th>
-                <th>Points</th>
+                <th><span class="lift:loc.name">Name</span></th>
+                <th><span class="lift:loc.points">Points</span></th>
               </tr>
             </thead>
             <tbody>

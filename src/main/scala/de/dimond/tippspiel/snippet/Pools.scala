@@ -76,8 +76,9 @@ class Pools extends Logger {
       }
     }
     "#create_pool_form" #> {
-      "name=pool_name" #> SHtml.text(PoolName.is, PoolName(_)) &
-      "name=pool_description" #> SHtml.textarea(PoolDescription.is, PoolDescription(_)) &
+      "name=pool_name" #> SHtml.text(PoolName.is, PoolName(_), "placeholder" -> S.?("pool_name_placeholder")) &
+      "name=pool_description" #> SHtml.textarea(PoolDescription.is, PoolDescription(_),
+          "placeholder" -> S.?("pool_description_placeholder")) &
       "name=allow_member_invite" #> SHtml.checkbox(AllowMemberInvite.is, AllowMemberInvite(_)) &
       "name=process" #> SHtml.hidden(process)
     }
@@ -168,7 +169,7 @@ class Pools extends Logger {
         }
         "name=process" #> SHtml.hidden(process) &
         "#leave_pool_button [onclick]" #> {
-          "if (confirm('Really leave pool')) { $('#leave_pool_form').submit(); }" // TODO: language
+          "if (confirm('%s')) { $('#leave_pool_form').submit(); }".format(S.?("really_leave_pool"))
         }
       }
     }
