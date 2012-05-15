@@ -20,19 +20,29 @@ class LoginButton {
       "#login_link [href]" #> "/logout" &
       "#user_img [src]" #> user.profilePictureUrl &
       "#user_name *" #> user.fullName &
-      "#login_link *" #> S.?("logout")
+      "#login_link *" #> S.?("logout") &
+      "#login_button" #> ""
     }
     case _ => {
+      "#userbox *" #> "" &
+      "#userbox" #> ""
+      /*
       "#login_link [href]" #> "/facebook/authorize" &
       "#user_img [src]" #> "/images/fb_logo.png" &
       "#user_name *" #> S.?("login")
+      */
     }
-  }) &
-  "#current_lang_flag [src]" #> ("/images/flags/" + S.?("flag_image")) &
-  ".lang_element" #> (Languages.supportedLanguages
-      filter(S.locale.getLanguage() != _.locale.getLanguage())
-      map { lang =>
-        ".lang_code [value]" #> lang.locale.toString &
-        ".lang_flag [src]" #> ("/images/flags/" + lang.flag)
   })
+}
+
+class LanguageSelect {
+  def render = {
+    "#current_lang_flag [src]" #> ("/images/flags/" + S.?("flag_image")) &
+    ".lang_element" #> (Languages.supportedLanguages
+        filter(S.locale.getLanguage() != _.locale.getLanguage())
+        map { lang =>
+          ".lang_code [value]" #> lang.locale.toString &
+          ".lang_flag [src]" #> ("/images/flags/" + lang.flag)
+    })
+  }
 }

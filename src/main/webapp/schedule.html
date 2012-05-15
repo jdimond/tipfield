@@ -5,7 +5,7 @@
   </head>
   <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
-      <div class="lift:Schedule.schedule">
+      <div class="lift:Schedule.schedule?eager_eval=true">
         <div class="row selection_row">
           <div class="span3" id="prev_matchday"></div>
           <div class="span3" id="matchday_select" style="text-align: center;">
@@ -23,37 +23,7 @@
           </div>
           <div class="span3" id="next_matchday" style="text-align: right"></div>
         </div>
-        <table id="games" class="table table-bordered table-striped">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th><span class="lift:loc.kick_off">Kick off</span></th>
-              <th><span class="lift:loc.matchup">Match up</span></th>
-              <th><span class="lift:loc.result">Result</span></th>
-              <th><span class="lift:loc.tip">Tip</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="game">
-              <td id="game_id"></td>
-              <td id="game_time">27.10.2011 15:30</td>
-              <td>
-                <div id="game_team_home" class="game_team" style="text-align: right">Team One</div> :
-                <div id="game_team_away" class="game_team" style="text-align: left">Team Two</div>
-              </td>
-              <td id="game_result">0 : 0</td>
-              <td id="game_tip">
-                <form id="game_form" class="form-horizontal">
-                  <input type="text" name="guess_home" class="goal_input spinner" /> :
-                  <input type="text" name="guess_away" class="goal_input spinner" />
-                  <input type="hidden" name="process" />
-                  <input type="image" id="save_game_button" src="/images/go.png" />
-                  <img id="game_ajax_loader" src="/images/ajax-loader.gif" style="display: none" />
-                </form>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <lift:embed what="/templates-hidden/games" />
       </div>
     </div>
   </body>

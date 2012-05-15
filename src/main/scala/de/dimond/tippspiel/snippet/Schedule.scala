@@ -70,6 +70,6 @@ class Schedule {
       case x if x == 0 => buildLinkPrev(None)
       case x => buildLinkPrev(Some(all(x - 1)))
     }) &
-    "#games" #> { ".game" #> matchday.games.map(GameSnippet.html(_)) }
+    "#games" #> GameSnippet.render(matchday.games)
   }
 }

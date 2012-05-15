@@ -7,6 +7,7 @@ import org.scala_tools.time.Imports._
 trait MetaTip {
   def updatePoints(result: Result): Boolean
   def forUserAndGame(user: User, game: Game): Box[Tip]
+  def forUserAndGames(user: User, games: Seq[Game]): Map[Game, Tip]
   def saveForUserAndGame(user: User, game: Game, goalsHome: Int, goalsAway: Int): Boolean
 }
 

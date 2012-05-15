@@ -7,8 +7,6 @@
     <link href="/css/default.css" rel="stylesheet" type="text/css" media="screen" charset="utf-8" />
     <script id="jquery" src="/js/jquery-1.7.2.min.js" type="text/javascript">
     </script>
-    <script src="/js/jquery.mousewheel.plugin.js" type="text/javascript">
-    </script>
     <script src="/js/bootstrap.js" type="text/javascript">
     </script>
     <script src="/js/bootstrap-button.js" type="text/javascript">
@@ -17,33 +15,22 @@
     </script>
     <script src="/js/default.js" type="text/javascript">
     </script>
-    <title>Tippspiel</title>
+    <title>TipField</title>
   </head>
   <body>
-    <div id="header">
+    <div id="header" class="lift:LoginButton">
       <div class="wrapper">
         <div id="logo">
           <span><a href="/"><img alt="" src="/images/logo.png"></a></span>
         </div>
-        <div id="userbox" class="lift:LoginButton">
+        <a href="/facebook/authorize" id="login_button" class="btn btn-primary btn-large">
+          <span class="lift:loc.login">Sign In</span>
+        </a>
+        <div id="userbox">
           <img id="user_img" height="38px" width="38px" alt="Avatar" src="https://graph.facebook.com/jonathan.dimond/picture" />
           <div id="userbox_div">
             <strong id="user_name">Jonathan Dimond</strong><br>
             <a href="/logout" id="login_link"></a>
-	          <div class="btn-group selection_row" id="lang_select">
-	            <a id="current_lang" class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-	              <img id="current_lang_flag" src="/images/flags/germany.png" />
-	              <span class="caret"></span>
-	            </a>
-	            <ul class="dropdown-menu" id="lang_list">
-	              <li class="lang_element">
-	                <form method="POST">
-	                  <input type="hidden" class="lang_code" name="locale" value="de_DE" />
-	                  <input type="image" class="lang_flag" src="/images/flags/germany.png" />
-	                </form>
-	              </li>
-	            </ul>
-	          </div>
           </div>
         </div>
       </div>
@@ -53,6 +40,20 @@
         <div id="navigation">
           <lift:Menu.builder ul:class="nav nav-pills" li_item:class="active" linkToSelf="true" />
         </div>
+        <div class="lift:LanguageSelect btn-group selection_row" id="lang_select">
+          <a id="current_lang" class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+            <img id="current_lang_flag" src="/images/flags/germany.png" />
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" id="lang_list">
+            <li class="lang_element">
+              <form method="POST">
+                <input type="hidden" class="lang_code" name="locale" value="de_DE" />
+                <input type="image" class="lang_flag" src="/images/flags/germany.png" />
+              </form>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
     <div class="container">
@@ -61,6 +62,11 @@
         &copy; 2012 Jonathan Dimond |
         <a href="/aboutus"><span class="lift:loc.aboutus">Impressum</span></a> |
         <a href="/privacypolicy"><span class="lift:loc.privacypolicy">Datenschutz</span></a>
+        <br />
+        <span>
+          Icons: <a href="http://glyphicons.com">Glyphicons Free</a>,
+          <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>
+        </span>
       </footer>
     </div>
   </body>

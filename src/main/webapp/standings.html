@@ -5,7 +5,7 @@
   </head>
   <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
-      <div class="lift:Standings.standings">
+      <div class="lift:Standings.standings?eager_eval=true">
         <div class="btn-group selection_row" id="group_select">
           <a id="current_group" class="btn dropdown-toggle" data-toggle="dropdown" href="#">
             <span id="group_name"></span>
@@ -41,6 +41,8 @@
             </table>
           </div>
         </div>
+        <hr />
+        <lift:embed what="templates-hidden/games" />
       </div>
     </div>
   </body>

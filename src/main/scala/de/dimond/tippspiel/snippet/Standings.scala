@@ -45,7 +45,8 @@ class Standings {
         "li *" #> Group.all.map(x => <a href={"/standings/%s".format(x.name)}>{S.?("group") + " %s".format(x.name)}</a>)
       }
     } &
-    "#standings" #> tableHtml
+    "#standings" #> tableHtml &
+    "#games" #> GameSnippet.render(currentGroup.games)
   }
 
 }

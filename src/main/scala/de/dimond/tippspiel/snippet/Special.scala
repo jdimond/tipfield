@@ -4,7 +4,7 @@ package snippet
 //import scala.xml.{NodeSeq, Text}
 import net.liftweb.util._
 import net.liftweb.common._
-import net.liftweb.http.SHtml
+import net.liftweb.http.{SHtml, S}
 import net.liftweb.http.SHtml._
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js.jquery._
@@ -19,13 +19,13 @@ import de.dimond.tippspiel.model._
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 
 object SpecialSnippet {
-  def html(user: User, special: Special) = {
+  def html(user: User, special: Special, tips: Map[Special, SpecialTip]) = {
     val ajaxId = nextFuncName
     val resultId = nextFuncName
-    val tip = SpecialTip.answerForUser(user, special)
+    val tip = tips.get(special)
     val answers = (if (tip.isEmpty) Seq(("", "")) else Seq()) ++
       special.answers.zipWithIndex.map(t => (t._2.toString, t._1.localizedAnswer))
-    val selected = tip.map(_.answerId.toString) or Full("")
+    val selected = tip.map(_.answerId.toString) orElse Some("")
     val showAjaxLoader = Call("toggleShowing", resultId, ajaxId)
 
     def showResultImg(path: String) = {
@@ -53,7 +53,7 @@ object SpecialSnippet {
       }
     }
 
-    ".special_title *" #> special.localizedTitle &
+    ".special_title *" #> "%s (%d %s)".format(special.localizedTitle, special.points, S.?("points")) &
     ".special_select" #> SHtml.ajaxSelect(answers, selected, showAjaxLoader, saveTip _) &
     "#special_button [src]" #> (if (tip.isEmpty) "/images/fail.png" else "/images/check.png") &
     "#special_ajax_loader [id]" #> ajaxId &
@@ -64,6 +64,9 @@ object SpecialSnippet {
 class TipOverview {
   val user = User.currentUser.open_!
 
-  def listSpecials = ".special_question" #> Special.all.map(SpecialSnippet.html(user, _))
-  def listGames = "#games" #> { ".game" #> Game.all.map(GameSnippet.html(_)) }
+  def listSpecials = {
+    val tips = SpecialTip.answersForUser(user, Special.all)
+    ".special_question" #> Special.all.map(SpecialSnippet.html(user, _, tips))
+  }
+  def listGames = "#games" #> GameSnippet.render(Game.all)
 }

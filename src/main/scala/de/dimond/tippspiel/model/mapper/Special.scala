@@ -11,6 +11,15 @@ import java.util.Date
 object DbSpecialTip extends DbSpecialTip with LongKeyedMetaMapper[DbSpecialTip] with MetaSpecialTip {
   def updatePoints(special: Special, finalAnswerId: Int): Boolean = false
   def answerForUser(user: User, special: Special) = find(By(_userId, user.id), By(_specialId, special.id))
+  def answersForUser(user: User, specials: Seq[Special]): Map[Special, SpecialTip] =  {
+    val specialTips = findAll(By(_userId, user.id), ByList(_specialId, specials.map(_.id)))
+    val tipMap = specialTips.map(tip => (tip._specialId.is, tip)).toMap
+    val seq = for {
+      special <- specials
+      tip <- tipMap.get(special.id)
+    } yield (special -> tip)
+    seq.toMap
+  }
   def saveForUser(user: User, special: Special, answerId: Int): Boolean = {
     if (DateTime.now > special.finalAnswerTime) {
       return false

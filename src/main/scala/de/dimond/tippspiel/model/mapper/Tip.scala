@@ -11,6 +11,16 @@ import java.util.Date
 object DbTip extends DbTip with LongKeyedMetaMapper[DbTip] with MetaTip {
   def updatePoints(result: Result): Boolean = false
   def forUserAndGame(user: User, game: Game): Box[Tip] = find(By(_userId, user.id), By(_gameId, game.id))
+  def forUserAndGames(user: User, games: Seq[Game]): Map[Game, Tip] = {
+    val ids: Seq[Long] = games.map(_.id)
+    val tips = findAll(By(_userId, user.id), ByList(_gameId, games.map(_.id)))
+    val tipMap = tips.map(tip => (tip.gameId, tip)).toMap
+    val gameTipSeq = for {
+      game <- games
+      tip <- tipMap.get(game.id)
+    } yield (game -> tip)
+    gameTipSeq.toMap
+  }
   def saveForUserAndGame(user: User, game: Game, goalsHome: Int, goalsAway: Int): Boolean = {
     if (DateTime.now > game.date) {
       return false
@@ -18,6 +28,7 @@ object DbTip extends DbTip with LongKeyedMetaMapper[DbTip] with MetaTip {
     val tip = find(By(_userId, user.id), By(_gameId, game.id)) openOr DbTip.create._userId(user.id)._gameId(game.id)
     tip._goalsHome(goalsHome)
     tip._goalsAway(goalsAway)
+    tip._submissionTime(new Date())
     return tip.save()
   }
 }

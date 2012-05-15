@@ -6,8 +6,8 @@ object Languages {
 
   val supportedLanguages = Seq(
     Lang(Locale.ENGLISH, "great_britain.png"),
-    Lang(Locale.GERMAN, "germany.png"),
-    Lang(Locale.FRENCH, "france.png"))
+    Lang(Locale.GERMAN, "germany.png"))
+    //Lang(Locale.FRENCH, "france.png")) /* TODO: Complete translation */
 
     case class Lang(locale: Locale, flag: String)
 }

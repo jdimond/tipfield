@@ -10,6 +10,8 @@ import net.liftweb.http.js._
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js.JE._
 import net.liftweb.http.js.jquery._
+import net.liftweb.http.js.jquery.JqJsCmds._
+import net.liftweb.http.js.jquery.JqJE._
 import Helpers._
 import net.liftweb.mapper.By
 
@@ -51,12 +53,7 @@ class Pools extends Logger {
     case _ => FacebookPool
   }
 
-  lazy val poolUsers = {
-    for {
-      userId <- currentPool.users.toSeq
-      user <- User.findById(userId)
-    } yield user
-  }
+  lazy val poolUsers = User.findAll(currentPool.users)
 
   def poolRanking = {
     UserRanking.rankingTable(User.rankUsers(poolUsers))
@@ -93,6 +90,8 @@ class Pools extends Logger {
   })
 
   def ajaxFriendsButtonResponseHandler(response: Any): JsCmd = {
+    val success = alertSuccess(?("alert_success_title"), ?("alert_invited_friends"))
+    val failure = alertFailure(?("alert_failure_title"), ?("unexpected_error_occured"))
     Full(response).asA[Map[String, Any]] match {
       case Full(r) => {
         (r.get("request"), r.get("to")) match {
@@ -104,25 +103,42 @@ class Pools extends Logger {
             currentPool match {
               case FacebookPool => {
                 debug("Invited to facebook pool: %s".format(currentPool))
+                success
               }
               case realPool => {
                 strIds.map(realPool.inviteUser(_, Some(user)))
                 debug("Added following invites: %s".format(strIds))
-                _Noop /* TODO: inform user */
+                success
               }
             }
           }
           case other => {
             warn("Wrong type: %s".format(other))
-            _Noop
+            failure
           }
         }
       }
       case other => {
         warn("Not a JSON: %s".format(other))
-        _Noop
+        failure
       }
     }
+  }
+
+  def alertSuccess(title: String, message: String) = {
+    JqId("alert") ~> JqAttr("class", "alert alert-success") &
+    alert(title, message)
+  }
+
+  def alertFailure(title: String, message: String) = {
+    JqId("alert") ~> JqAttr("class", "alert alert-error") &
+    alert(title, message)
+  }
+
+  def alert(title: String, message: String) = {
+    JqId("alert_title") ~> JqText(title) &
+    JqId("alert_text") ~> JqText(message) &
+    Show("alert")
   }
 
   def inviteFriendsButton = {
@@ -131,7 +147,7 @@ class Pools extends Logger {
       val excludeIds = "[%s]".format(poolUsers.map(u => encJs(u.fbId)).mkString(", "))
       "#invite_friends_button [onclick]" #> {
         "FB.ui({method: 'apprequests', message: %s, exclude_ids: %s}, function(response) { %s });".format(
-          encJs("Invitation to Tippspiel"),
+          encJs(?("invitation_request")),
           excludeIds,
           ajaxCall._2.toJsCmd
         )

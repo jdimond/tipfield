@@ -141,7 +141,9 @@ class DbPoolInvites extends LongKeyedMapper[DbPoolInvites] with IdPK {
   def getSingleton = DbPoolInvites
 
   object invitingUserId extends MappedLong(this)
-  object fbId extends MappedString(this, 16)
+  object fbId extends MappedString(this, 16) {
+    override def dbIndexed_? = true
+  }
   object pool extends MappedLongForeignKey(this, DbPool)
   object ignored extends MappedBoolean(this)
 }

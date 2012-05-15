@@ -10,10 +10,10 @@ import net.liftweb.http.S
 
 object Game {
   def all = games.values.toList.sortWith((e1, e2) => (e1.date compareTo e2.date) < 0)
-  private var games: Map[Int, Game] = Map()
+  private var games: Map[Long, Game] = Map()
 }
 
-case class Game(id: Int, teamHome: TeamReference, teamAway: TeamReference, date: DateTime, location: Location) {
+case class Game(id: Long, teamHome: TeamReference, teamAway: TeamReference, date: DateTime, location: Location) {
   Game.games = Game.games + ((id, this))
 }
 

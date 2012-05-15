@@ -23,6 +23,7 @@ trait MetaSpecialTip {
   def updatePoints(special: Special, finalAnswerId: Int): Boolean
   def saveForUser(user: User, special: Special, answerNumber: Int): Boolean
   def answerForUser(user: User, special: Special): Box[SpecialTip]
+  def answersForUser(user: User, specials: Seq[Special]): Map[Special, SpecialTip]
 }
 
 trait SpecialTip {

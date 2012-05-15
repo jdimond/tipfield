@@ -86,6 +86,7 @@ trait MetaUser[U <: User] extends ProtoUser with Logger {
   def create(fullName: String, fbId: String): User
   def findById(id: Long): Box[User]
   def findByFbId(fbId: String): Box[User]
+  def findAll(ids: Set[Long]): Seq[User]
   def userRanking(count: Int): Seq[(Rank, User)]
 
   def rankUsers[B](users: Seq[User]): Seq[(Rank, User)] = {

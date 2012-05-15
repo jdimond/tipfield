@@ -2,8 +2,8 @@ body {
   padding-top: 0px;
 }
 #header {
-  -float: left;
   background: #262F35;
+  background: url("/img/bg_header.png") repeat;
   width: 100%;
   min-height: 100px;
 }
@@ -16,6 +16,10 @@ body {
 #userbox a:hover {
   color: #FFF;
   text-decoration: none;
+}
+#login_button {
+  float: right;
+  margin: 29px 0 20px;
 }
 #userbox {
   background: url("/img/userbox.png") no-repeat scroll left bottom transparent;
@@ -42,22 +46,9 @@ body {
 #login_link {
 	min-width: 90px;
 }
-#current_lang {
-	background: none;
-	border: none;
-	box-shadow: none;
-	padding: 0px;
-	margin-top: 14px;
-}
 #lang_select {
 	float: right;
-	padding-left: 2px;
-  opacity: 0.75;
-  filter: alpha(opacity=75);
-}
-#lang_select:hover {
-	opacity: 1;
-  filter: alpha(opacity=100);
+  margin-top: -36px;
 }
 #lang_list {
 	min-width: 0px;

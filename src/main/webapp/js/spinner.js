@@ -62,6 +62,7 @@
     input.bind('keyup', function(e) {
       submitConditionally();
     });
+    /*
     input.mousewheel(function(e, delta) {
       if (delta > 0) {
         change(1);
@@ -78,6 +79,7 @@
       }
       return false;
     });
+    */
   }
 
   $(document).ready(function() {

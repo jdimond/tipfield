@@ -26,18 +26,20 @@ class Boot extends Bootable with Logger {
     // where to search snippet
     LiftRules.addToPackages("de.dimond.tippspiel")
 
-    val ifLoggedIn = If (() => User.loggedIn_?, () => RedirectResponse("/login"))
+    val ifLoggedIn = If (() => User.loggedIn_?, () => RedirectResponse("/"))
     val ifAdmin = If(() => Props.devMode || User.superUser_?, () => RedirectResponse("/index"))
 
     // Build SiteMap
     val entries = List(
       //Menu.i("Home") / "index", // the simple way to declare a menu
-      Menu(Loc("Home", List("index") -> false, S.?("home"), ifLoggedIn)),
+      //Menu(Loc("Home", List("index") -> false, S.?("home"), ifLoggedIn)),
       Menu(Loc("My Tips", List("tips") -> false, S.?("my_tips"), ifLoggedIn)),
       Menu(Loc("My Pools", List("pools") -> false, S.?("my_pools"), ifLoggedIn)),
-      Menu(Loc("Schedule", List("schedule") -> false, S.?("schedule"), ifLoggedIn)),
+      Menu(Loc("Schedule", List("schedule") -> false, S.?("schedule"))),
       Menu(Loc("Standings", List("standings") -> false, S.?("standings"))),
+      Menu(Loc("How It Works", List("howto") -> false, S.?("howto"))),
       Menu(Loc("Admin", List("admin") -> false, S.?("admin"), ifAdmin)),
+      Menu.i("index") / "index" >> Hidden,
       Menu.i("login") / "login" >> Hidden,
       Menu.i("aboutus") / "aboutus" >> Hidden,
       Menu.i("privacypolicy") / "privacypolicy" >> Hidden,
@@ -64,6 +66,16 @@ class Boot extends Bootable with Logger {
       case Req(_, "js", GetRequest) => false
     }
 
+    LiftRules.statefulRewrite.append {
+      case RewriteRequest(ParsePath(List("index"),_,_,_),_,_) => {
+        if (User.loggedIn_?) {
+          RewriteResponse("tips" :: Nil)
+        } else {
+          RewriteResponse("login" :: Nil)
+        }
+      }
+    }
+
     LiftRules.statelessRewrite.append {
       case RewriteRequest(ParsePath(List("schedule", matchday),_,_,_),_,_) =>
          RewriteResponse("schedule" :: Nil, Map("matchday" -> matchday))
@@ -71,7 +83,6 @@ class Boot extends Bootable with Logger {
          RewriteResponse("standings" :: Nil, Map("group" -> group))
       case RewriteRequest(ParsePath(List("pools", poolid),_,_,_),_,_) =>
          RewriteResponse("pools" :: Nil, Map("poolid" -> poolid))
-
     }
 
     // Make sure ExtendedSession is used

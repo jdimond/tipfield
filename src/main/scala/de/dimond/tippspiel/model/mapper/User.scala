@@ -21,6 +21,7 @@ object DbUser extends DbUser with LongKeyedMetaMapper[DbUser] with MetaUser[DbUs
   }
   override def findById(id: Long): Box[User] = find(By(_id, id))
   override def findByFbId(fbId: String): Box[User] = find(By(_fbId, fbId))
+  override def findAll(ids: Set[Long]): Seq[User] = findAll(ByList(_id, ids.toSeq))
   override def userRanking(count: Int): Seq[(Rank, User)] = Seq()
   override def addPointsForUser(userId: Long, points: Int): Boolean = false
 
@@ -94,6 +95,7 @@ class DbUser extends User with LongKeyedMapper[DbUser] with Logger {
   }
   protected object _fbId extends MappedString(this, 16) {
     override def required_? = true
+    override def dbIndexed_? = true
   }
   protected object _admin extends MappedBoolean(this) {
     override def required_? = true

@@ -14,7 +14,7 @@ import org.scala_tools.time.Imports._
 
 import de.dimond.tippspiel._
 import de.dimond.tippspiel.model.{Points, PointsExact, PointsTendency, PointsSameDifference, PointsNone}
-import de.dimond.tippspiel.model.Game
+import de.dimond.tippspiel.model.{Game, Tip}
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 import de.dimond.tippspiel.util._
 
@@ -23,7 +23,7 @@ object TipForm {
   import net.liftweb.http.js._
   import net.liftweb.http.js.jquery._
   import net.liftweb.http._
-  def render(game: Game): NodeSeq => NodeSeq = {
+  def render(game: Game, tip: Option[Tip]): NodeSeq => NodeSeq = {
     def renderBeforeGame(user: model.User) = {
       var guessHome = ""
       var guessAway = ""
@@ -69,9 +69,8 @@ object TipForm {
       }
 
       val bodyTrans = {
-        val tip = Tip.forUserAndGame(user, game)
-        val goalsHome = tip map { _.goalsHome.toString } openOr "0"
-        val goalsAway = tip map { _.goalsAway.toString } openOr "0"
+        val goalsHome = tip map { _.goalsHome.toString } getOrElse "0"
+        val goalsAway = tip map { _.goalsAway.toString } getOrElse "0"
         "#save_game_button [src]" #> (if (tip.isEmpty) "/images/fail.png" else "/images/check.png") &
         "name=guess_home" #> SHtml.text(goalsHome, guessHome = _) &
         "name=guess_away" #> SHtml.text(goalsAway, guessAway = _) &
@@ -112,6 +111,8 @@ object TipForm {
       _: NodeSeq => Text("")
     }
 
+    def renderLogin = "* *" #> (<a href="/facebook/authorize" class="btn btn-primary">Login</a>)
+
     User.currentUser match {
       case Full(user) => {
         if (DateTime.now < game.date) {
@@ -120,14 +121,14 @@ object TipForm {
           renderAfterGame(user)
         }
       }
-      case _ => renderUserError
+      case _ => renderLogin
     }
   }
 }
 
 object GameSnippet {
   import scala.xml.Text
-  def html(game: Game, hidden: Boolean = false) = {
+  private def row(game: Game, tip: Option[Tip], hidden: Boolean = false) = {
     "tr [id]" #> "game_id%d".format(game.id) &
     (if (hidden) "tr [style]" #> "display: none"
      else "tr [style]" #> "") &
@@ -139,10 +140,19 @@ object GameSnippet {
       case Full(result) => "%d : %d".format(result.goalsHome, result.goalsAway)
       case _ => "- : -"
     }) &
-    "#game_tip" #> TipForm.render(game)
+    "#game_tip" #> TipForm.render(game, tip)
+  }
+
+  def render(games: Seq[Game]) = {
+    val tips: Map[Game, Tip] = User.currentUser match {
+      case Full(user) => Tip.forUserAndGames(user, games)
+      case _ => Map()
+    }
+    ".game" #> games.map(game => row(game, tips.get(game)))
   }
 }
 
+/*
 class GameListing {
   val user = User.currentUser open_!
   def list = "#games" #> { ".game" #> Game.all.filter(game => {
@@ -152,3 +162,4 @@ class GameListing {
       Tip.forUserAndGame(user, game).isEmpty
     }).zipWithIndex.map(g => GameSnippet.html(g._1, g._2 >= 3)) }
 }
+*/

@@ -75,7 +75,7 @@ class FacebookApi(val secret: String) extends Logger {
     contentOpt match {
       case Some(content) => {
         (content \ "algorithm") match {
-          case JString(algorithm) => { /* TODO match insenstive */
+          case JString(algorithm) => {
             algorithm.toUpperCase match {
               case "HMAC-SHA256" => {
                 val key = new SecretKeySpec(secret.getBytes("ASCII"), "hmacSHA256")
