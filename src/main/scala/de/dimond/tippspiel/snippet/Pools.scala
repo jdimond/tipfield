@@ -86,8 +86,8 @@ class Pools extends Logger {
 
   def poolList = ".pool_entry" #> (pools map { pool =>
     ".pool_link [href]" #> linkForPool(pool) &
-    ".pool_button *" #> (if (currentPool.id == pool.id) <b>{pool.name}</b> else <span>{pool.name}</span>) &
-    ".pool_button [class+]" #> (if (currentPool.id == pool.id) "btn-inverse" else "")
+    ".pool_link *" #> (if (currentPool.id == pool.id) <b>{pool.name}</b> else <span>{pool.name}</span>) &
+    ".pool_link [class+]" #> (if (currentPool.id == pool.id) "btn-inverse" else "")
   })
 
   def ajaxFriendsButtonResponseHandler(response: Any): JsCmd = {
@@ -185,21 +185,23 @@ class Pools extends Logger {
     val invitations = Pool.invitationsForUser(user)
     checkInvitationRequests(invitations)
     if(invitations.size > 0) {
-      "#pool_invitations" #> {
+      ".invitation_entry" #> {
         invitations map { pool =>
           val id = Helpers.nextFuncName
           ".invitation_entry [id]" #> id &
           ".pool_name *" #> pool.name &
-          ".join_link *" #> { body => SHtml.a(() => {
-            FacebookRequestDeleter ! (user, FacebookRequests.getRequests(user.fbId, pool.id))
-            pool.addUser(user)
-            S.redirectTo(linkForPool(pool))
-          }, body) } &
-          ".ignore_link *" #> { body => SHtml.a(() => {
-            FacebookRequestDeleter ! (user, FacebookRequests.getRequests(user.fbId, pool.id))
-            pool.ignoreInvitations(user)
-            JqJsCmds.FadeOut(id, TimeSpan(0), TimeSpan(700))
-          }, body) }
+          ".join_link" #> SHtml.a(() => {
+              FacebookRequestDeleter ! (user, FacebookRequests.getRequests(user.fbId, pool.id))
+              pool.addUser(user)
+              S.redirectTo(linkForPool(pool))
+            },
+            scala.xml.Text(?("join")), "class" -> "btn btn-success") &
+          ".ignore_link" #> SHtml.a(() => {
+              FacebookRequestDeleter ! (user, FacebookRequests.getRequests(user.fbId, pool.id))
+              pool.ignoreInvitations(user)
+              JqJsCmds.FadeOut(id, TimeSpan(0), TimeSpan(700))
+            },
+            scala.xml.Text(?("ignore")), "class" -> "btn btn-danger")
         }
       }
     } else {

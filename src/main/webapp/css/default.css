@@ -237,3 +237,7 @@ input[disabled] {
   margin-bottom: 30px;
   width: 450px;
 }
+
+.invitation_entry {
+  margin-bottom: 20px;
+}
