@@ -14,17 +14,18 @@ import org.scala_tools.time.Imports._
 
 import de.dimond.tippspiel._
 import de.dimond.tippspiel.model.{Points, PointsExact, PointsTendency, PointsSameDifference, PointsNone}
-import de.dimond.tippspiel.model.{Game, Tip}
+import de.dimond.tippspiel.model.{Game, Tip, Trivia}
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 import de.dimond.tippspiel.util._
 
-object TipForm {
+object TipForm extends Logger {
   import scala.xml._
   import net.liftweb.http.js._
   import net.liftweb.http.js.jquery._
   import net.liftweb.http._
   def render(game: Game, tip: Option[Tip]): NodeSeq => NodeSeq = {
     def renderBeforeGame(user: model.User) = {
+      val popoverId = nextFuncName
       var guessHome = ""
       var guessAway = ""
 
@@ -59,7 +60,30 @@ object TipForm {
           case (Some(h), Some(a)) if (h >= 0 && a >= 0 && DateTime.now < game.date) => {
             val saved = Tip.saveForUserAndGame(user, game, h, a)
             if (saved) {
-              success
+              /* Don't let the trivia disturb the saving of the user tips, so catch all exceptions */
+              try {
+                Trivia.generate(game, user, h, a) match {
+                  case Some(trivia) => {
+                    if (trivia.startsWith("trivia_")) {
+                      warn("Translation not found for: %s".format(trivia))
+                      success
+                    } else {
+                      val encTrivia = encJs(trivia)
+                      val encId = encJs(popoverId)
+                      Run("$('#' + %s).popover({content:%s})".format(encId, encTrivia)) &
+                      Run("$('#' + %s).data('popover').options.content= %s;".format(encId, encTrivia)) &
+                      Run("$('#' + %s).popover('show');".format(encId)) &
+                      success
+                    }
+                  }
+                  case None => success
+                }
+              } catch {
+                case e => {
+                  warn("Error during trivia generation", e)
+                  success
+                }
+              }
             } else {
               failure
             }
@@ -78,7 +102,8 @@ object TipForm {
       }
       val showLoader = JqJsCmds.Hide(mkId("save_game_button")) & JqJsCmds.Show(mkId("game_ajax_loader"))
       val hideLoader = JqJsCmds.Hide(mkId("game_ajax_loader"))
-      "form" #> {body => XmlHelpers.uniquifyIds(mkId)(SHtml.ajaxForm(bodyTrans(body), showLoader))}
+      "form" #> {body => XmlHelpers.uniquifyIds(mkId)(SHtml.ajaxForm(bodyTrans(body), showLoader))} &
+      "#game_tip [id]" #> popoverId
     }
 
     def renderAfterGame(user: model.User) = "* *" #> {
