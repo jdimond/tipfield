@@ -18,4 +18,8 @@ object SnippetHelpers extends Logger {
     warn(text)
     Full(PlainTextResponse(text, Nil, 400))
   }
+
+  def replaceNewlinesWithBrs(s: String): NodeSeq = {
+    s.split("\n").toList.flatMap(x => Text(x) ++ <br />).dropRight(1)
+  }
 }

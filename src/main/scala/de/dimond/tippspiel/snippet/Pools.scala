@@ -14,16 +14,14 @@ import net.liftweb.http.js.jquery.JqJsCmds._
 import net.liftweb.http.js.jquery.JqJE._
 import Helpers._
 import net.liftweb.mapper.By
-
 import scala.actors.Actor
-
 import org.scala_tools.time.Imports._
-
 import de.dimond.tippspiel._
 import de.dimond.tippspiel.model._
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 import de.dimond.tippspiel.util._
 import de.dimond.tippspiel.lib._
+import scala.xml.Text
 
 object PoolName extends RequestVar("")
 object PoolDescription extends RequestVar("")
@@ -209,6 +207,21 @@ class Pools extends Logger {
     }
   }
 
-  def poolName = "* *" #> currentPool.name
-  def poolDescription = "* *" #> currentPool.description
+  def poolInfo = {
+    "#pool_name *" #> currentPool.name &
+    "#pool_description *" #> {
+      def text = <span id="pool_description_text">{SnippetHelpers.replaceNewlinesWithBrs(currentPool.description)}</span>
+      var textField = <p>{text} <i id="pool_description_pencil" class="icon-pencil"></i></p>
+      def editField = SHtml.ajaxTextarea(currentPool.description, (s) => {
+          currentPool.updateDescription(s)
+          SetHtml("pool_description_text", text)
+        }, "class" -> "pool_description_textarea")
+
+      if (currentPool.adminId == user.id) {
+        SHtml.swappable(textField, editField)
+      } else {
+        <p>{SnippetHelpers.replaceNewlinesWithBrs(currentPool.description)}</p>
+      }
+    }
+  }
 }

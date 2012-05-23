@@ -123,6 +123,11 @@ class DbPool extends Pool with LongKeyedMapper[DbPool] with Logger {
       invitation.save()
     }
   }
+
+  override def updateDescription(description: String) = {
+    _description(description)
+    save()
+  }
 }
 
 object DbPoolMembership extends DbPoolMembership with LongKeyedMetaMapper[DbPoolMembership]

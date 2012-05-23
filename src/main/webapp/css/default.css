@@ -241,3 +241,13 @@ input[disabled] {
 .invitation_entry {
   margin-bottom: 20px;
 }
+
+.pool_description_textarea {
+	width: 97.5%;
+	margin-bottom: 3px;
+	resize: none;
+}
+#pool_description_pencil {
+	float:right;
+	margin-bottom: 9px;
+}

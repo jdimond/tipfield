@@ -28,6 +28,7 @@ trait Pool {
   def userIsAllowedToInvite(user: User): Boolean
   def userIsInvited(facebookId: String): Boolean
   def ignoreInvitations(user: User): Unit
+  def updateDescription(description: String): Unit
 }
 
 case object FacebookPool extends Pool {
@@ -47,6 +48,7 @@ case object FacebookPool extends Pool {
   def userIsAllowedToInvite(user: User) = true
   def userIsInvited(facebookId: String) = true
   def ignoreInvitations(user: User) = throw new RuntimeException("Not supported")
+  def updateDescription(description: String) = throw new RuntimeException("Not supported")
 }
 
 trait MetaFacebookRequests {
