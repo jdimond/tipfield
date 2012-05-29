@@ -110,6 +110,7 @@ class Pools extends Logger {
                 success
               }
             }
+            Run(tellFriendsDialog(strIds))
           }
           case other => {
             warn("Wrong type: %s".format(other))
@@ -121,6 +122,35 @@ class Pools extends Logger {
         /* cancelled */
         Noop
       }
+    }
+  }
+
+  def ajaxTellFriendsDialogResponseHandler(response: Any): JsCmd = {
+      Noop
+  }
+
+  /* Generate call to tell friends about the invitation using fb send dialog */
+  def tellFriendsDialog(userIds: Seq[String]) = {
+    if (userIds.isEmpty == false) {
+      /* Only not yet existent users */
+      val filteredIds = userIds.filter(userid => (
+          User.findByFbId(userid) match {
+        case Full(user) => false
+        case Empty => true
+        case _ => false
+      }))
+      val toIds = "[%s]".format(filteredIds.map(fbId => encJs(fbId)).mkString(", "))
+
+      val ajaxCall = SHtml.jsonCall(JsRaw("response"), ajaxTellFriendsDialogResponseHandler)
+      "FB.ui({method: 'send', name: %s, description: %s, to: %s, link: %s, picture: %s}, function(response) { %s });".format(
+        encJs(?("invitation_request_name")),
+        encJs(?("invitation_request_description").format(user.fullName, currentPool.name)),
+        toIds,
+        encJs(S.hostAndPath + "/pools/"),
+        encJs(S.hostAndPath + "/images/logo.png"),
+        ajaxCall._2.toJsCmd)
+    } else {
+      ""
     }
   }
 
