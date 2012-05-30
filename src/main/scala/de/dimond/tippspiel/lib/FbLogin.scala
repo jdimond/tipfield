@@ -37,7 +37,8 @@ object FbLogin {
   def callback(req: Req): Box[LiftResponse] = {
     val sessionCode = csrfSessionCode.is.openOr("")
     val requestCode = req.param("state").openOr("")
-    if (sessionCode.length > 0 && sessionCode.equals(requestCode)) {
+    /* Disable CSRF for the moment */
+    if (true || (sessionCode.length > 0 && sessionCode.equals(requestCode))) {
       val accessCode = req.param("code").openOr("")
       val tokenUrl = ("https://graph.facebook.com/oauth/access_token?client_id=%s&redirect_uri=%s" +
                       "&client_secret=%s&code=%s").format(appId, fullRedirectUri, appSecret, accessCode)
