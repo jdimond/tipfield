@@ -65,3 +65,16 @@ trait FacebookRequest {
   def fromUserId: Long
   def forFbId: String
 }
+
+trait PoolComment {
+  def commentDate: DateTime
+  def commentId: Long
+  def poolId: Long
+  def userId: Long
+  def comment: String
+}
+
+trait MetaPoolComment {
+  def saveComment(pool: Pool, user: User, comment: String): Box[PoolComment]
+  def commentsForPool(pool: Pool): Seq[PoolComment]
+}

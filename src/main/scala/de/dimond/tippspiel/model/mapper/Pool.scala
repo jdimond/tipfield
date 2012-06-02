@@ -152,3 +152,41 @@ class DbPoolInvites extends LongKeyedMapper[DbPoolInvites] with IdPK {
   object pool extends MappedLongForeignKey(this, DbPool)
   object ignored extends MappedBoolean(this)
 }
+
+object DbPoolComment extends DbPoolComment with LongKeyedMetaMapper[DbPoolComment] with MetaPoolComment {
+  override def saveComment(pool: Pool, user: User, comment: String): Box[PoolComment] = {
+    if (comment.length > 2048) {
+      return Failure("Comment too long!")
+    }
+    val pc = DbPoolComment.create
+    pc._userId(user.id)
+    pc._poolId(pool.id)
+    pc._date(new Date())
+    pc._comment(comment)
+    if (pc.save()) {
+      Full(pc)
+    } else {
+      Failure("Failed to save tip!")
+    }
+  }
+
+  override def commentsForPool(pool: Pool) = {
+    val all = DbPoolComment.findAll(By(_poolId, pool.id))
+    all.sortWith((e1, e2) => (e1.commentDate compareTo e2.commentDate) < 0)
+  }
+}
+
+class DbPoolComment extends LongKeyedMapper[DbPoolComment] with IdPK with PoolComment {
+  def getSingleton = DbPoolComment
+
+  object _poolId extends MappedLong(this)
+  object _date extends MappedDateTime(this)
+  object _userId extends MappedLong(this)
+  object _comment extends MappedString(this, 2048)
+
+  override def commentDate = new DateTime(_date.is)
+  override def commentId = id.is
+  override def poolId = _poolId.is
+  override def userId = _userId.is
+  override def comment = _comment.is
+}

@@ -251,3 +251,24 @@ input[disabled] {
 	float:right;
 	margin-bottom: 9px;
 }
+
+/* Comments section */
+
+#comments_table td {
+  text-align: left;
+}
+
+.comment_img, #add_comment_img {
+  float: left;
+  margin-right: 10px;
+}
+
+.comment_time {
+  float: right;
+  color: #aaa;
+}
+
+#comment_textarea {
+  width: 370px;
+}
+

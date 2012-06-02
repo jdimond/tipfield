@@ -60,6 +60,7 @@ class Boot extends Bootable with Logger {
     LiftRules.liftRequest.append {
       case Req("classpath" :: _, _, _) => true
       case Req("ajax_request" :: _, _, _) => true
+      case Req("comet_request" :: _, _, _) => true
       case Req("favicon" :: Nil, "ico", GetRequest) => false
       case Req("static" :: _, _, _) => false
       case Req(_, "css", GetRequest) => false
@@ -122,28 +123,33 @@ class Boot extends Bootable with Logger {
 
   val localeCookieName = "locale"
 
-  // Use our own Locale calculation method using cookie or browser locale
-  LiftRules.localeCalculator = {
-    case fullReq @ Full(req) => {
-      // Check against a set cookie, or the locale sent in the request
-      def currentLocale : Locale =
-        S.findCookie(localeCookieName).flatMap {
-          cookie => cookie.value.map(computeLocale)
-        } openOr LiftRules.defaultLocaleCalculator(fullReq)
+  def localeCalculator(request: Box[HTTPRequest]): Locale = {
 
-      // Check to see if the user explicitly requests a new locale
-      S.param("locale") match {
-        case Full(requestedLocale) if requestedLocale != null => {
-          val computedLocale = computeLocale(requestedLocale)
-          S.addCookie(HTTPCookie(localeCookieName, Full(requestedLocale), Full(S.hostName),
-              Full("/"), Full(3600*24*365), Empty, Empty))
-          computedLocale
-        }
-        case _ => currentLocale
+    object sessionLanguage extends SessionVar[Locale](LiftRules.defaultLocaleCalculator(request))
+
+    request.flatMap(r => {
+      def localeCookie(in: String): HTTPCookie =
+        HTTPCookie(localeCookieName, Full(in), Empty, Full("/"), Full(2629743), Empty, Empty)
+      def localeFromString(in: String): Locale = {
+        val x = in.split("_").toList;
+        sessionLanguage(new Locale(x.head, x.last))
+        sessionLanguage.is
       }
-    }
-    case _ => Locale.getDefault
+      def calcLocale: Box[Locale] = {
+        S.findCookie(localeCookieName).map(_.value.map(localeFromString)).openOr(Full(sessionLanguage.is))
+      }
+      S.param("locale") match {
+        case Full(null) => calcLocale
+        case f@Full(selectedLocale) => {
+          S.addCookie(localeCookie(selectedLocale))
+          Helpers.tryo(localeFromString(selectedLocale))
+        }
+        case _ => calcLocale
+      }
+    }).openOr(sessionLanguage.is)
   }
+
+  LiftRules.localeCalculator = localeCalculator
 
   // Use own internationalization resources
   LiftRules.resourceNames = "i18n/messages" :: LiftRules.resourceNames

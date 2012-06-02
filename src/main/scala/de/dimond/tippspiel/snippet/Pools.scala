@@ -3,6 +3,7 @@ package snippet
 
 import net.liftweb.util._
 import net.liftweb.common._
+import net.liftweb.actor._
 import net.liftweb.http._
 import net.liftweb.http.SHtml._
 import net.liftweb.http.S._
@@ -52,6 +53,11 @@ class Pools extends Logger {
   }
 
   lazy val poolUsers = User.findAll(currentPool.users)
+
+  def cometGuard(in: scala.xml.NodeSeq) = currentPool match {
+    case FacebookPool => scala.xml.NodeSeq.Empty
+    case p: Pool => in
+  }
 
   def poolRanking = {
     UserRanking.rankingTable(User.rankUsers(poolUsers))
