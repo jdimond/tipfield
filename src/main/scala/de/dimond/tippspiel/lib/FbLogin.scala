@@ -18,16 +18,18 @@ import de.dimond.tippspiel.model._
 import de.dimond.tippspiel.util._
 import de.dimond.tippspiel.util.Util._
 
-object FbLogin {
+object FbLogin extends Logger {
   import FacebookApi._
 
   object csrfSessionCode extends SessionVar[Box[String]](Empty)
+  object redirect extends SessionVar[Box[String]](Empty)
 
   def fullRedirectUri = "%s%s".format(S.hostAndPath, redirectUri)
 
   def authorize(req: Req, redirectUri: Option[String] = None): Box[LiftResponse] = {
     val code = UUID.randomUUID().toString()
     csrfSessionCode.set(Full(code))
+    redirect.set(S.param("redirect"))
     val uri = Helpers.urlEncode(redirectUri getOrElse fullRedirectUri)
     val dialogUrl = ("https://www.facebook.com/dialog/oauth?client_id=%s&redirect_uri=%s" +
                     "&state=%s").format(appId, uri, code)
@@ -48,7 +50,23 @@ object FbLogin {
 
       api.updateUserInfo(accessToken, Some(new DateTime().plusSeconds(expires.toInt)))
 
-      S.redirectTo("/")
+      val redirectBox = redirect.is
+      redirect.set(Empty)
+
+      redirectBox match {
+        case Full(r) => {
+          if (r.startsWith("/")) {
+            S.redirectTo(r)
+          } else {
+            if (r.length > 0) {
+              warn("Illegal redirection url: %s".format(r))
+            }
+            S.redirectTo("/")
+          }
+        }
+        case _ => S.redirectTo("/")
+      }
+
     } else {
       SnippetHelpers.die("State doesn't match. You are probably a victim of CSRF")
     }
