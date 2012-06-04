@@ -245,6 +245,19 @@ class Pools extends Logger {
 
   def poolInfo = {
     "#pool_name *" #> currentPool.name &
+    "#invitation_link_section" #> {
+      currentPool.invitationLinkForUser(user) match {
+        case Full(link) => {
+          val linkUrl = "%s/invite/%s".format(S.hostAndPath, link.invitationId)
+          "#invitation_link" #> <a>{linkUrl}</a>
+        }
+        case f: Failure => {
+          warn("Failure getting invitation link: %s".format(f))
+          "*" #> ""
+        }
+        case Empty => "*" #> ""
+      }
+    } &
     "#pool_description *" #> {
       def text = <span id="pool_description_text">{SnippetHelpers.replaceNewlinesWithBrs(currentPool.description)}</span>
       var textField = <p>{text} <i id="pool_description_pencil" class="icon-pencil"></i></p>

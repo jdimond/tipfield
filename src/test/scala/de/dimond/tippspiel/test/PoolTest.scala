@@ -47,13 +47,23 @@ class PoolTest extends ModelSpec {
     pool.users should be (Set(defaultUser.id))
   }
 
-  "Pool" should "not add user if there is no invitation" in {
-    val poolBox = Pool.newPool("Name", "Description", true, defaultUser)
+  "Pool" should "not add user if there is no invitation for private pools" in {
+    val poolBox = Pool.newPool("Name", "Description", false, defaultUser)
     val pool = poolBox.open_!
     val newUser = User.create("Test User 2", "30012")
     newUser.save()
     pool.addUser(newUser) should be (false)
   }
+
+  "Pool" should "add user if there is no invitation for public pools" in {
+    val poolBox = Pool.newPool("Name", "Description", true, defaultUser)
+    val pool = poolBox.open_!
+    val newUser = User.create("Test User 2", "30013")
+    newUser.save()
+    pool.addUser(newUser) should be (true)
+    pool.users should be (Set(newUser.id, defaultUser.id))
+  }
+
 
   "Pool" should "remove admin" in {
     val poolBox = Pool.newPool("Name", "Description", true, defaultUser)
@@ -208,5 +218,71 @@ class PoolTest extends ModelSpec {
     pool.inviteUser(user.fbId, Some(defaultUser))
     pool.userIsInvited(user.fbId) should be (true)
     Pool.invitationsForUser(user) should be (Set(pool))
+  }
+
+  "Invitation Link" should "be generated for Users" in {
+    val poolBox = Pool.newPool("Name", "Description", true, defaultUser)
+    val pool = poolBox.open_!
+    val invitationLinkBox = pool.invitationLinkForUser(defaultUser)
+    invitationLinkBox.isEmpty should be (false)
+    val invitationLink = invitationLinkBox.open_!
+    invitationLink.userId should be (defaultUser.id)
+    invitationLink.poolId should be (pool.id)
+    invitationLink.invitationId.length should be > (10)
+  }
+
+  "Invitation Link" should "be unique for different users" in {
+    val poolBox = Pool.newPool("Name", "Description", true, defaultUser)
+    val pool = poolBox.open_!
+    val newUser = User.create("Test User 2", "110012")
+    newUser.save() should be (true)
+    pool.addUser(newUser)
+    val il1Box = pool.invitationLinkForUser(defaultUser)
+    val il2Box = pool.invitationLinkForUser(newUser)
+    il1Box.isEmpty should be (false)
+    il2Box.isEmpty should be (false)
+    val il1 = il1Box.open_!
+    il1.userId should be (defaultUser.id)
+    il1.poolId should be (pool.id)
+    val il2 = il2Box.open_!
+    il2.userId should be (newUser.id)
+    il2.poolId should be (pool.id)
+    il1.invitationId should not be (il2.invitationId)
+  }
+
+  "Invitation Links" should "not exist for non-admins in private pools" in {
+    val poolBox = Pool.newPool("Name", "Description", false, defaultUser)
+    val pool = poolBox.open_!
+    val newUser = User.create("Test User 2", "130012")
+    newUser.save() should be (true)
+    pool.addUser(newUser)
+    pool.invitationLinkForUser(newUser) should be (Empty)
+  }
+
+  "Invitation Links" should "not exist for users not in the group" in {
+    val poolBox = Pool.newPool("Name", "Description", true, defaultUser)
+    val pool = poolBox.open_!
+    val newUser = User.create("Test User 2", "120012")
+    newUser.save() should be (true)
+    pool.invitationLinkForUser(newUser) should be (Empty)
+  }
+
+  "Invitation Links" should "should be unique for different pools" in {
+    val poolBox1 = Pool.newPool("Name", "Description", true, defaultUser)
+    val poolBox2 = Pool.newPool("Name", "Description", true, defaultUser)
+    val pool1 = poolBox1.open_!
+    val pool2 = poolBox2.open_!
+
+    val il1Box = pool1.invitationLinkForUser(defaultUser)
+    val il2Box = pool2.invitationLinkForUser(defaultUser)
+    il1Box.isEmpty should be (false)
+    il2Box.isEmpty should be (false)
+    val il1 = il1Box.open_!
+    il1.userId should be (defaultUser.id)
+    il1.poolId should be (pool1.id)
+    val il2 = il2Box.open_!
+    il2.userId should be (defaultUser.id)
+    il2.poolId should be (pool2.id)
+    il1.invitationId should not be (il2.invitationId)
   }
 }

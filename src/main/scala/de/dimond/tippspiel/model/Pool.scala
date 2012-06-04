@@ -10,6 +10,7 @@ trait MetaPool {
   def newPool(name: String, description: String, allowMemberInvite: Boolean, admin: User): Box[Pool]
   def allForUser(user: User): Set[Pool]
   def forId(poolId: Long): Box[Pool]
+  def findInvitationById(invitationId: String): Box[InvitationLink]
   def invitationsForUser(user: User, withIgnored: Boolean = false, withActive: Boolean = false): Set[Pool]
 }
 
@@ -20,6 +21,8 @@ trait Pool {
   def users: Set[Long]
   def adminId: Long
 
+  def invitationLinkForUser(user: User): Box[InvitationLink]
+
   def removeUser(user: User): Boolean
   def addUser(user: User): Boolean
 
@@ -29,6 +32,12 @@ trait Pool {
   def userIsInvited(facebookId: String): Boolean
   def ignoreInvitations(user: User): Unit
   def updateDescription(description: String): Unit
+}
+
+trait InvitationLink {
+  def poolId: Long
+  def userId: Long
+  def invitationId: String
 }
 
 case object FacebookPool extends Pool {
@@ -42,6 +51,8 @@ case object FacebookPool extends Pool {
   def adminId = 0
   def removeUser(user: User) = throw new RuntimeException("Not supported")
   def addUser(user: User) = throw new RuntimeException("Not supported")
+
+  def invitationLinkForUser(user: User) = None
 
   def userHasLeftGroup(userId: Long) = Full(false)
   def inviteUser(facebookId: String, fromUser: Option[User]) = throw new RuntimeException("Not supported")

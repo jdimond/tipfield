@@ -40,6 +40,7 @@ class Boot extends Bootable with Logger {
       Menu(Loc("How It Works", List("howto") -> false, S.?("howto"))),
       Menu(Loc("Admin", List("admin") -> false, S.?("admin"), ifAdmin)),
       Menu.i("index") / "index" >> Hidden,
+      Menu.i("invite") / "invite" >> Hidden,
       Menu.i("login") / "login" >> Hidden,
       Menu.i("aboutus") / "aboutus" >> Hidden,
       Menu.i("privacypolicy") / "privacypolicy" >> Hidden,
@@ -84,6 +85,8 @@ class Boot extends Bootable with Logger {
          RewriteResponse("standings" :: Nil, Map("group" -> group))
       case RewriteRequest(ParsePath(List("pools", poolid),_,_,_),_,_) =>
          RewriteResponse("pools" :: Nil, Map("poolid" -> poolid))
+      case RewriteRequest(ParsePath(List("invite", inviteId),_,_,_),_,_) =>
+         RewriteResponse("invite" :: Nil, Map("inviteid" -> inviteId))
     }
 
     // Make sure ExtendedSession is used
