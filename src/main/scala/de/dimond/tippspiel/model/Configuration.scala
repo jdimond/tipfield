@@ -36,7 +36,13 @@ object PersistanceConfiguration {
     if (Props.testMode) {
       Schemifier.destroyTables_!!(Schemifier.infoF _, tables: _*)
     }
-    Schemifier.schemify(true, Schemifier.infoF _, tables: _*)
+    val cmds = Schemifier.schemify(true, false, Schemifier.infoF _, tables: _*)
+    if (!cmds.isEmpty) {
+      logger.warn("Still have to perform following changes to DB:\n%s".format(cmds.mkString("\n")))
+    } else {
+      logger.info("DB Schema seems to be correct")
+    }
+
     if (!Props.productionMode) {
       DB.addLogFunc {
         case (query, time) => {

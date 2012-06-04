@@ -10,10 +10,9 @@ import org.scala_tools.time.Imports._
 import java.util.Date
 
 object DbUser extends DbUser with LongKeyedMetaMapper[DbUser] with MetaUser[DbUser] with Logger {
+  override def dbIndexes = UniqueIndex(_fbId) :: super.dbIndexes
+
   override def create(fullName: String, fbId: String): User = {
-    if (count(By(_fbId, fbId)) > 0) {
-      throw new IllegalArgumentException("Can't readd user to database with same id!")
-    }
     val user: DbUser = DbUser.create
     user.fullName = fullName
     user.fbId = fbId
@@ -28,7 +27,15 @@ object DbUser extends DbUser with LongKeyedMetaMapper[DbUser] with MetaUser[DbUs
   override def afterCreate = updateUserIdForFriends _ :: super.afterCreate
 
   override def save(user: DbUser) = {
-    if (super.save(user)) {
+    val saved = try {
+      super.save(user)
+    } catch {
+      case e => {
+        warn("Caught exception when saving user: %s".format(user), e)
+        false
+      }
+    }
+    if (saved) {
       updateFacebookFriends(user)
     } else {
       false
@@ -95,7 +102,7 @@ class DbUser extends User with LongKeyedMapper[DbUser] with Logger {
   }
   protected object _fbId extends MappedString(this, 16) {
     override def required_? = true
-    override def dbIndexed_? = true
+    override def dbIndexed_? = false /* this is taken care of by the unique index in DbUser object */
   }
   protected object _admin extends MappedBoolean(this) {
     override def required_? = true
