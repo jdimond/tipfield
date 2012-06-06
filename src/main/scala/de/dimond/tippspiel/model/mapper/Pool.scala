@@ -97,7 +97,7 @@ class DbPool extends Pool with LongKeyedMapper[DbPool] with Logger {
     val pools = DbPoolMembership.findAll(By(DbPoolMembership.userId, user.id), By(DbPoolMembership.pool, this))
     val successMembership = pools.map(_.hasLeft(true).save()).reduce(_ && _)
     val invites = DbPoolInvites.findAll(By(DbPoolInvites.fbId, user.fbId), By(DbPoolInvites.pool, this))
-    val successInvites = invites.map(_.ignored(true).save()).reduce(_ && _)
+    val successInvites = invites.map(_.ignored(true).save()).foldLeft(true)(_ && _)
     return successInvites && successMembership
   }
 
