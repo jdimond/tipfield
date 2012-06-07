@@ -16,6 +16,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
 import de.dimond.tippspiel.model._
+import PersistanceConfiguration._
 
 class Standings {
   import scala.xml.Text
@@ -46,7 +47,7 @@ class Standings {
       }
     } &
     "#standings" #> tableHtml &
-    "#games" #> GameSnippet.render(currentGroup.games)
+    "#games" #> GameSnippet.render(currentGroup.games, User.currentUser)
   }
 
 }

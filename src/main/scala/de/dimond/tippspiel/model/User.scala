@@ -91,9 +91,6 @@ trait MetaUser[U <: User] extends ProtoUser with Logger {
   def findAll(): Seq[User]
   def userRanking(count: Int): Seq[(Rank, User)]
 
-  /* Reload user so we start over fresh */
-  override def currentUser = currentUserId.flatMap(Util.parseLong(_)).flatMap(findById(_))
-
   def rankUsers(users: Seq[User]): Seq[(Rank, User)] = {
     val stableSorted = users.groupBy(_.points).toSeq.sortBy(_._1).reverse.map(_._2).flatten
     stableSorted.foldLeft((1, 0, Int.MaxValue, List(): List[(Rank, User)]))({

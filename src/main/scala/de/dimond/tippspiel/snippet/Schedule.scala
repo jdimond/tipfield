@@ -16,6 +16,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
 import de.dimond.tippspiel.model._
+import PersistanceConfiguration._
 
 class Schedule {
   import scala.xml._
@@ -70,6 +71,6 @@ class Schedule {
       case x if x == 0 => buildLinkPrev(None)
       case x => buildLinkPrev(Some(all(x - 1)))
     }) &
-    "#games" #> GameSnippet.render(matchday.games)
+    "#games" #> GameSnippet.render(matchday.games, User.currentUser)
   }
 }

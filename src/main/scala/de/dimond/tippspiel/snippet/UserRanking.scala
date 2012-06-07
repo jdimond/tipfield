@@ -16,7 +16,7 @@ object UserRanking {
   def rankingTable(ranking: Seq[(Rank, User)]) = {
     ".ranking_entry" #> { ranking.map { case (rank, user) => {
       ".ranking_rank *" #> rank.is &
-      ".ranking_full_name *" #> user.fullName &
+      ".ranking_full_name *" #> <a href={ "/tips/%s".format(user.fbId) }>{ user.fullName }</a> &
       "img [src]" #> user.profilePictureUrl &
       ".ranking_points *" #> user.points
     }}}

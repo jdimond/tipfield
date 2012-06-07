@@ -14,7 +14,7 @@ import org.scala_tools.time.Imports._
 
 import de.dimond.tippspiel._
 import de.dimond.tippspiel.model.{Points, PointsExact, PointsTendency, PointsSameDifference, PointsNone}
-import de.dimond.tippspiel.model.{Game, Tip, Trivia, Result}
+import de.dimond.tippspiel.model.{Game, Tip, Trivia, Result, User}
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 import de.dimond.tippspiel.util._
 
@@ -23,7 +23,11 @@ object TipForm extends Logger {
   import net.liftweb.http.js._
   import net.liftweb.http.js.jquery._
   import net.liftweb.http._
-  def render(game: Game, tip: Option[Tip], result: Option[Result]): NodeSeq => NodeSeq = {
+  def render(game: Game, tip: Option[Tip], result: Option[Result], user: Option[User]): NodeSeq => NodeSeq = {
+    val isCurrentUser = (User.currentUser, user) match {
+      case (Full(curUser), Some(user)) if (curUser.id == user.id) => true
+      case _ => false
+    }
     def renderBeforeGame(user: model.User) = {
       val popoverId = nextFuncName
       var guessHome = ""
@@ -133,31 +137,38 @@ object TipForm extends Logger {
       }
     }
 
+    def renderHidden = "* *" #> {
+      <input disabled="disabled" class="input goal_input disabled_tip" value="?" /> ++ Text(" : ") ++
+      <input disabled="disabled" class="input goal_input disabled_tip" value="?" /> ++
+      Text(" ") ++ <span class="badge">&nbsp;&nbsp;</span>
+    }
+
     def renderUserError = {
       _: NodeSeq => Text("")
     }
 
     def renderLogin = "* *" #> (<a href="/facebook/authorize" class="btn btn-primary">Login</a>)
 
-    User.currentUser match {
-      case Full(user) => {
+    user match {
+      case Some(user) => {
         if (DateTime.now < game.date) {
-          renderBeforeGame(user)
+          if (isCurrentUser) {
+            renderBeforeGame(user)
+          } else {
+            renderHidden
+          }
         } else {
           renderAfterGame(user)
         }
       }
-      case _ => renderLogin
+      case None => renderLogin
     }
   }
 }
 
 object GameSnippet extends Logger {
   import scala.xml.Text
-  private def row(game: Game, tip: Option[Tip], result: Option[Result], hidden: Boolean = false) = {
-    "tr [id]" #> "game_id%d".format(game.id) &
-    (if (hidden) "tr [style]" #> "display: none"
-     else "tr [style]" #> "") &
+  private def row(game: Game, tip: Option[Tip], result: Option[Result], user: Option[User]) = {
     "#game_id *" #> game.id &
     "#game_time *" #> DateHelpers.formatTime(game.date) &
     "#game_team_home *" #> SnippetHelpers.teamHtml(game.teamHome).reverse &
@@ -166,26 +177,14 @@ object GameSnippet extends Logger {
       case Some(result) => "%d : %d".format(result.goalsHome, result.goalsAway)
       case None => "- : -"
     }) &
-    "#game_tip" #> TipForm.render(game, tip, result)
+    "#game_tip" #> TipForm.render(game, tip, result, user)
   }
 
-  def render(games: Seq[Game]) = {
-    val tips: Map[Game, Tip] = User.currentUser match {
-      case Full(user) => Tip.forUserAndGames(user, games)
-      case _ => Map()
+  def render(games: Seq[Game], user: Option[User]) = {
+    val tips: Map[Game, Tip] = user match {
+      case Some(user) => Tip.forUserAndGames(user, games)
+      case None => Map()
     }
-    ".game" #> games.map(game => row(game, tips.get(game), Result.forGame(game).toOption))
+    ".game" #> games.map(game => row(game, tips.get(game), Result.forGame(game).toOption, user))
   }
 }
-
-/*
-class GameListing {
-  val user = User.currentUser open_!
-  def list = "#games" #> { ".game" #> Game.all.filter(game => {
-      DateTime.now < game.date &&
-      game.teamAway.team.isRight &&
-      game.teamHome.team.isRight &&
-      Tip.forUserAndGame(user, game).isEmpty
-    }).zipWithIndex.map(g => GameSnippet.html(g._1, g._2 >= 3)) }
-}
-*/

@@ -191,6 +191,7 @@ body {
 .disabled_tip {
   cursor: text;
   margin-bottom: 0px;
+  text-align: center;
   display: inline-block;
 }
 input[disabled] {
@@ -234,6 +235,17 @@ input.special_wrong {
 input.special_right {
   border-color: #468847;
   color: #468847;
+}
+
+#tips_profile_img {
+  float: left;
+  margin-right: 20px;
+  margin-top: 15px;
+}
+
+#tips_hr {
+  margin-top: 0px;
+  margin-bottom: 40px;
 }
 
 /* Landing page */

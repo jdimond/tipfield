@@ -23,8 +23,9 @@ object SpecialSnippet extends Logger {
     val tip = tips.get(special)
     val answers = (if (tip.isEmpty) Seq(("", "")) else Seq()) ++
       special.answers.zipWithIndex.map(t => (t._2.toString, t._1.localizedAnswer))
+    val isCurrentUser = User.currentUser.open_!.id == user.id
 
-    def beforeDeadline = {
+    def edit = {
       val ajaxId = nextFuncName
       val resultId = nextFuncName
       val selected = tip.map(_.answerId.toString) orElse Some("")
@@ -60,7 +61,7 @@ object SpecialSnippet extends Logger {
       "#special_button [id]" #> resultId
     }
 
-    def afterDeadline = {
+    def noedit = {
       val answer = tip.flatMap(tip =>
         if (tip.answerId >= 0 && tip.answerId < special.answers.size) {
           Some(special.answers(tip.answerId).localizedAnswer)
@@ -79,19 +80,50 @@ object SpecialSnippet extends Logger {
       ".special_answer *" #> answerHtml
     }
 
+    def hidden = {
+      val answerHtml = <input disabled="disabled" class="special_select" value="???" />
+      ".special_answer *" #> answerHtml
+    }
+
     ".special_title *" #> special.localizedTitle &
     ".special_points *" #> special.points &
-    ".special_answer" #> (if (DateTime.now < special.finalAnswerTime) beforeDeadline else afterDeadline)
+    ".special_answer" #> {
+      if (DateTime.now < special.finalAnswerTime) {
+        if (isCurrentUser) {
+          edit
+        } else {
+          hidden
+        }
+      } else {
+        noedit
+      }
+    }
   }
 }
 
 class TipOverview {
-  val user = User.currentUser.open_!
+  val userBox = S.param("fbuserid") match {
+    case Full(fbid) => User.findByFbId(fbid)
+    case _ => User.currentUser
+  }
+
+  val user = userBox.open_!
+
+  def userHeader = {
+    val userRank = user.ranking match {
+      case Some(r) => r.toString
+      case None => "-"
+    }
+    "#user_rank *" #> "%s %s".format(S.?("place"), userRank) &
+    "#user_points *" #> "%d %s".format(user.points, S.?("points")) &
+    "#user_name" #> user.fullName &
+    "#tips_profile_img [src]" #> user.profilePictureUrl
+  }
 
   def listSpecials = {
     val tips = SpecialTip.answersForUser(user, Special.all)
     ".special_question" #> Special.all.map(SpecialSnippet.html(user, _, tips))
   }
 
-  def listGames = "#games" #> GameSnippet.render(Game.all)
+  def listGames = "#games" #> GameSnippet.render(Game.all, Some(user))
 }

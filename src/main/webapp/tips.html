@@ -5,9 +5,36 @@
   </head>
   <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
+      <div class="lift:TipOverview.userHeader row">
+        <div class="span9">
+          <div class="row">
+            <div class="span5">
+                <img src="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-snc4/275245_721865530_5434230_q.jpg"
+                height="50px" width="50px" id="tips_profile_img">
+              <h2>
+                <br />
+                <span id="user_name">Jonathan Dimond</span>
+              </h2>
+            </div>
+            <div class="span2">
+              <h2>
+                <br />
+                <small id="user_points">20 Points</small>
+              </h2>
+            </div>
+            <div class="span2" style="text-align: right">
+              <h2>
+                <br />
+                <small id="user_rank">Place 2000</small>
+              </h2>
+            </div>
+          </div>
+          <hr id="tips_hr" />
+        </div>
+      </div>
       <div class="row">
         <div class="lift:TipOverview.listSpecials span9">
-          <h1><span class="lift:loc.specials">Specials</span></h1>
+          <h3><span class="lift:loc.specials">Specials</span></h3>
           <hr />
           <table id="games" class="table table-bordered table-striped table-condensed">
             <thead>
@@ -36,7 +63,7 @@
       <br />
       <div class="row">
         <div class="lift:TipOverview.listGames?eager_eval=true span9">
-          <h1><span class="lift:loc.games">Games</span></h1>
+          <h3><span class="lift:loc.games">Games</span></h3>
           <hr />
           <lift:embed what="/templates-hidden/games" />
         </div>

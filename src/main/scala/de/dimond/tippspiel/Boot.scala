@@ -87,6 +87,8 @@ class Boot extends Bootable with Logger {
          RewriteResponse("pools" :: Nil, Map("poolid" -> poolid))
       case RewriteRequest(ParsePath(List("invite", inviteId),_,_,_),_,_) =>
          RewriteResponse("invite" :: Nil, Map("inviteid" -> inviteId))
+      case RewriteRequest(ParsePath(List("tips", fbuserid),_,_,_),_,_) =>
+         RewriteResponse("tips" :: Nil, Map("fbuserid" -> fbuserid))
     }
 
     // Make sure ExtendedSession is used
