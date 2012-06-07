@@ -9,15 +9,6 @@
         <a class="close" data-dismiss="alert">×</a>
         <span id="result_alert_text"><strong>Alert</strong>alert</span>
       </div>
-      <section id="developer_mode" class="lift:Admin.developerTools">
-        <div class="page-header"><h1>Developer Mode</h1></div>
-        <form id="create_user_testset">
-          <input type="hidden" name="process" />
-          <button type="submit" class="btn btn-large btn-primary" data-loading-text="Loading...">
-            Create User Testset
-          </button>
-        </form>
-      </section>
       <section id="database_tools" class="lift:Admin.databaseTools">
         <div class="page-header"><h1>Database Tools</h1></div>
         <form id="recalculate_all">
@@ -26,6 +17,35 @@
             Recalculate Points
           </button>
         </form>
+      </section>
+      <section id="results" class="lift:Admin.specialEditor">
+        <div class="page-header"><h1>Special Editor</h1></div>
+        <div class="row">
+          <div class="span9">
+            <table class="table table-bordered table-striped" id="specials">
+              <thead>
+                <tr>
+                  <th>Special</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="special_entry">
+                  <td id="special_question">Bla Blubb</td>
+                  <td>
+                    <form id="special_form" class="form-horizontal">
+                      <select class="special_select">
+                        <option value="1">Netherlands</option>
+                      </select>
+                      <input type="hidden" name="process" />
+                      <button type="submit" class="btn" data-loading-text="Saving...">Save</button>
+                    </form>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
       <section id="results" class="lift:Admin.resultEditor">
         <div class="page-header"><h1>Result Editor</h1></div>

@@ -219,6 +219,23 @@ input[disabled] {
   background-color:#008800;
 }
 
+/* Misc */
+
+.special_select {
+  margin-top: 7px;
+  width: 130px;
+}
+
+input.special_wrong {
+  border-color: #B94A48;
+  color: #B94A48;
+}
+
+input.special_right {
+  border-color: #468847;
+  color: #468847;
+}
+
 /* Landing page */
 .landing_page .row {
   -padding-top: 10px;

@@ -83,20 +83,27 @@ object Points {
       PointsNone
     }
   }
+  def apply(i: Int): Option[Points] = i match {
+    case PointsExact.points => Some(PointsExact)
+    case PointsSameDifference.points => Some(PointsSameDifference)
+    case PointsTendency.points => Some(PointsTendency)
+    case PointsNone.points => Some(PointsNone)
+    case _ => None
+  }
 }
 
 sealed trait Points {
   def points: Int
 }
 case object PointsExact extends Points {
-  def points = 3
+  val points = 3
 }
 case object PointsSameDifference extends Points {
-  def points = 2
+  val points = 2
 }
 case object PointsTendency extends Points {
-  def points = 1
+  val points = 1
 }
 case object PointsNone extends Points {
-  def points = 0
+  val points = 0
 }

@@ -14,7 +14,7 @@ import org.scala_tools.time.Imports._
 
 import de.dimond.tippspiel._
 import de.dimond.tippspiel.model.{Points, PointsExact, PointsTendency, PointsSameDifference, PointsNone}
-import de.dimond.tippspiel.model.{Game, Tip, Trivia}
+import de.dimond.tippspiel.model.{Game, Tip, Trivia, Result}
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 import de.dimond.tippspiel.util._
 
@@ -23,7 +23,7 @@ object TipForm extends Logger {
   import net.liftweb.http.js._
   import net.liftweb.http.js.jquery._
   import net.liftweb.http._
-  def render(game: Game, tip: Option[Tip]): NodeSeq => NodeSeq = {
+  def render(game: Game, tip: Option[Tip], result: Option[Result]): NodeSeq => NodeSeq = {
     def renderBeforeGame(user: model.User) = {
       val popoverId = nextFuncName
       var guessHome = ""
@@ -110,20 +110,21 @@ object TipForm extends Logger {
       def renderValue(value: String) = {
         <input disabled="disabled" class="input goal_input disabled_tip" value={ value } />
       }
-      (Tip.forUserAndGame(user, game), Result.forGame(game)) match {
-        case (Full(tip), Full(result)) => {
+      (tip, result) match {
+        case (Some(tip), Some(result)) => {
           renderValue(tip.goalsHome.toString) ++ Text(" : ") ++ renderValue(tip.goalsAway.toString) ++
           Text(" ") ++
           (tip.points match {
             case Some(PointsExact) => <span class="badge badge-success">{ PointsExact.points }</span>
-            case Some(PointsSameDifference) => <span class="badge badge-warning">{ PointsSameDifference.points }</span>
-            case Some(PointsTendency) => <span class="badge badge-info">{ PointsTendency.points }</span>
-            case Some(PointsNone) => <span class="badge badge-error">{ PointsNone.points }</span>
+            case Some(PointsSameDifference) => <span class="badge badge-info">{ PointsSameDifference.points }</span>
+            case Some(PointsTendency) => <span class="badge badge-warning">{ PointsTendency.points }</span>
+            case Some(PointsNone) => <span class="badge badge-important">{ PointsNone.points }</span>
             case _ => <span class="badge">&nbsp;&nbsp;</span>
           })
         }
-        case (Full(tip), _) => {
-          renderValue(tip.goalsHome.toString) ++ Text(" : ") ++ renderValue(tip.goalsAway.toString)
+        case (Some(tip), _) => {
+          renderValue(tip.goalsHome.toString) ++ Text(" : ") ++ renderValue(tip.goalsAway.toString) ++
+          Text(" ") ++ <span class="badge">&nbsp;&nbsp;</span>
         }
         case _ => {
           renderValue("-") ++ Text(" : ") ++ renderValue("-") ++
@@ -151,9 +152,9 @@ object TipForm extends Logger {
   }
 }
 
-object GameSnippet {
+object GameSnippet extends Logger {
   import scala.xml.Text
-  private def row(game: Game, tip: Option[Tip], hidden: Boolean = false) = {
+  private def row(game: Game, tip: Option[Tip], result: Option[Result], hidden: Boolean = false) = {
     "tr [id]" #> "game_id%d".format(game.id) &
     (if (hidden) "tr [style]" #> "display: none"
      else "tr [style]" #> "") &
@@ -161,11 +162,11 @@ object GameSnippet {
     "#game_time *" #> DateHelpers.formatTime(game.date) &
     "#game_team_home *" #> SnippetHelpers.teamHtml(game.teamHome).reverse &
     "#game_team_away *" #> SnippetHelpers.teamHtml(game.teamAway) &
-    "#game_result *" #> (Result.forGame(game) match {
-      case Full(result) => "%d : %d".format(result.goalsHome, result.goalsAway)
-      case _ => "- : -"
+    "#game_result *" #> (result match {
+      case Some(result) => "%d : %d".format(result.goalsHome, result.goalsAway)
+      case None => "- : -"
     }) &
-    "#game_tip" #> TipForm.render(game, tip)
+    "#game_tip" #> TipForm.render(game, tip, result)
   }
 
   def render(games: Seq[Game]) = {
@@ -173,7 +174,7 @@ object GameSnippet {
       case Full(user) => Tip.forUserAndGames(user, games)
       case _ => Map()
     }
-    ".game" #> games.map(game => row(game, tips.get(game)))
+    ".game" #> games.map(game => row(game, tips.get(game), Result.forGame(game).toOption))
   }
 }
 

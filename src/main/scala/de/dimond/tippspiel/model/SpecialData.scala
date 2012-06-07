@@ -46,12 +46,21 @@ object SpecialData {
     val utc2 = DateTimeZone.forOffsetHours(2)
     val euroStartDate = new DateTime(2012, 6, 8, 18, 00, utc2)
 
-    val winnerSpecial = Special(1, "euro_winner_title", 7, teamList, euroStartDate)
-    val topScorer = Special(2, "top_scorer_title", 3, teamList, euroStartDate)
-    val groupA = Special(3, "special_groupa_title", 3, groupATeams, euroStartDate)
-    val groupB = Special(4, "special_groupb_title", 3, groupBTeams, euroStartDate)
-    val groupC = Special(5, "special_groupc_title", 3, groupCTeams, euroStartDate)
-    val groupD = Special(6, "special_groupd_title", 3, groupDTeams, euroStartDate)
+    if (forTesting) {
+      val winnerSpecial = Special(1, "euro_winner_title", 7, teamList, DateTime.now)
+      val topScorer = Special(2, "top_scorer_title", 3, teamList, DateTime.now + 1.minute)
+      val groupA = Special(3, "special_groupa_title", 3, groupATeams, DateTime.now + 2.minutes)
+      val groupB = Special(4, "special_groupb_title", 3, groupBTeams, DateTime.now + 3.minutes)
+      val groupC = Special(5, "special_groupc_title", 3, groupCTeams, DateTime.now + 4.minutes)
+      val groupD = Special(6, "special_groupd_title", 3, groupDTeams, DateTime.now + 5.minutes)
+    } else {
+      val winnerSpecial = Special(1, "euro_winner_title", 7, teamList, euroStartDate)
+      val topScorer = Special(2, "top_scorer_title", 3, teamList, euroStartDate)
+      val groupA = Special(3, "special_groupa_title", 3, groupATeams, euroStartDate)
+      val groupB = Special(4, "special_groupb_title", 3, groupBTeams, euroStartDate)
+      val groupC = Special(5, "special_groupc_title", 3, groupCTeams, euroStartDate)
+      val groupD = Special(6, "special_groupd_title", 3, groupDTeams, euroStartDate)
+    }
 
     //val secondSpecial = Special(2, "euro_runnerup_title", 5, teamList, euroStartDate)
   }

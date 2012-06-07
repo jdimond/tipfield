@@ -22,6 +22,7 @@ import net.liftweb.util.Mailer._
 import S._
 
 import de.dimond.tippspiel.model.PersistanceConfiguration._
+import de.dimond.tippspiel.util.Util
 
 sealed trait Rank {
   def is: Int
@@ -87,9 +88,13 @@ trait MetaUser[U <: User] extends ProtoUser with Logger {
   def findById(id: Long): Box[User]
   def findByFbId(fbId: String): Box[User]
   def findAll(ids: Set[Long]): Seq[User]
+  def findAll(): Seq[User]
   def userRanking(count: Int): Seq[(Rank, User)]
 
-  def rankUsers[B](users: Seq[User]): Seq[(Rank, User)] = {
+  /* Reload user so we start over fresh */
+  override def currentUser = currentUserId.flatMap(Util.parseLong(_)).flatMap(findById(_))
+
+  def rankUsers(users: Seq[User]): Seq[(Rank, User)] = {
     val stableSorted = users.groupBy(_.points).toSeq.sortBy(_._1).reverse.map(_._2).flatten
     stableSorted.foldLeft((1, 0, Int.MaxValue, List(): List[(Rank, User)]))({
       case ((counter, currentRank, oldPoints, list), user) => {
@@ -102,7 +107,26 @@ trait MetaUser[U <: User] extends ProtoUser with Logger {
     })._4.reverse
   }
 
-  def addPointsForUser(userId: Long, points: Int): Boolean
+  def updatePointsAndRanking(): Boolean = {
+    val users = findAll()
+    val updatedPoints = users.map(_.updatePoints).foldLeft(true)(_ && _)
+    if (updatedPoints) {
+      val totalRanking = rankUsers(users)
+      val rankingSuccess = totalRanking.map { case (rank, user) =>
+        user.ranking = Some(rank.is)
+        user.save()
+      }.foldLeft(true)(_ && _)
+      if (rankingSuccess) {
+        true
+      } else {
+        warn("Failed to update user ranking!")
+        false
+      }
+    } else {
+      warn("Failed to update user points!")
+      false
+    }
+  }
 
   onLogIn = List(ExtendedSession.userDidLogin(_))
   onLogOut = List(_ => ExtendedSession.userDidLogout)
@@ -149,5 +173,24 @@ trait User {
   def friends: Set[Long]
 
   def points: Int
+  protected def points_=(p: Int): Unit
+
   def ranking: Option[Int]
+  def ranking_=(r: Option[Int]): Unit
+
+  def updatePoints() = {
+    val tips = Tip.forUserAndGames(this, Game.all)
+    val pointsTips = for {
+      tip <- tips.values
+      points <- tip.points
+    } yield points.points
+    val specials = SpecialTip.answersForUser(this, Special.all)
+    val pointsSpecials: Seq[Int] = for {
+      specialTip <- specials.values.toSeq
+      result <- SpecialResult.forSpecial(specialTip.special)
+      val points = result.special.points if specialTip.answerId == result.answerId
+    } yield points
+    this.points = pointsTips.sum + pointsSpecials.sum
+    this.save
+  }
 }

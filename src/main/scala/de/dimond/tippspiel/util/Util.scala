@@ -9,6 +9,7 @@ import net.liftweb.common._
 
 object Util {
   def parseInt(s: String) = try { Some(s.toInt) } catch { case _ => None }
+  def parseLong(s: String) = try { Some(s.toLong) } catch { case _ => None }
   def isToString(is: InputStream) = Source.fromInputStream(is).getLines().mkString("\n")
   def queryParams(params: String): Map[String, List[String]] = {
     val kvPairs = for {

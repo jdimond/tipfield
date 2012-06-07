@@ -22,7 +22,6 @@ object DbUser extends DbUser with LongKeyedMetaMapper[DbUser] with MetaUser[DbUs
   override def findByFbId(fbId: String): Box[User] = find(By(_fbId, fbId))
   override def findAll(ids: Set[Long]): Seq[User] = findAll(ByList(_id, ids.toSeq))
   override def userRanking(count: Int): Seq[(Rank, User)] = Seq()
-  override def addPointsForUser(userId: Long, points: Int): Boolean = false
 
   override def afterCreate = updateUserIdForFriends _ :: super.afterCreate
 
@@ -122,7 +121,7 @@ class DbUser extends User with LongKeyedMapper[DbUser] with Logger {
   protected object _points extends MappedInt(this) {
     override def dbIndexed_? = true
   }
-  protected object _ranking extends MappedInt(this) {
+  protected object _ranking extends MappedNullableLong(this) {
     override def dbIndexed_? = true
   }
 
@@ -173,7 +172,15 @@ class DbUser extends User with LongKeyedMapper[DbUser] with Logger {
   override def fbTimeZone_=(fbTimeZone: Option[String]) = _fbTimeZone(fbTimeZone)
 
   override def points = _points.is
-  override def ranking = Some(_ranking.is)
+  override def ranking = _ranking.is.map(_.toInt).toOption
+
+  override def ranking_=(r: Option[Int]) = {
+    _ranking(Box(r.map(_.toLong)))
+  }
+
+  override protected def points_=(p: Int) = {
+    _points(p)
+  }
 
   private var _facebookFriends: Option[Set[String]] = None
   private var _facebookFriendsDirty = false
@@ -198,6 +205,7 @@ class DbUser extends User with LongKeyedMapper[DbUser] with Logger {
     true))
     friends.map(_.friendUserId.is).toSet
   }
+
 }
 
 object DbFriends extends DbFriends with LongKeyedMetaMapper[DbFriends]

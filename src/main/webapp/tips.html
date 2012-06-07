@@ -9,16 +9,28 @@
         <div class="lift:TipOverview.listSpecials span9">
           <h1><span class="lift:loc.specials">Specials</span></h1>
           <hr />
-          <div class="special_question">
-            <p>
-              <h4 class="special_title">Who will become European Champion?</h4>
-            </p>
-            <select class="special_select">
-              <option value="1">Netherlands</option>
-            </select>
-              <img id="special_button" src="/images/fail.png" />
-              <img id="special_ajax_loader" src="/images/ajax-loader.gif" style="display: none" />
-          </div>
+          <table id="games" class="table table-bordered table-striped table-condensed">
+            <thead>
+              <tr>
+                <th><span class="lift:loc.specials">Special</span></th>
+                <th><span class="lift:loc.points">Points</span></th>
+                <th><span class="lift:loc.tip">Tip</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="special_question">
+                <td><h4 class="special_title">Who will become European Champion?</h4></td>
+                <td><h4 class="special_points">7</h4></td>
+                <td class="special_answer">
+                  <select class="special_select">
+                    <option value="1">Netherlands</option>
+                  </select>
+                  <img id="special_button" src="/images/fail.png" />
+                  <img id="special_ajax_loader" src="/images/ajax-loader.gif" style="display: none" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
       <br />

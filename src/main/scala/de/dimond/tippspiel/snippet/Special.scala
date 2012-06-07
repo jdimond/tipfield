@@ -18,46 +18,70 @@ import de.dimond.tippspiel._
 import de.dimond.tippspiel.model._
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 
-object SpecialSnippet {
+object SpecialSnippet extends Logger {
   def html(user: User, special: Special, tips: Map[Special, SpecialTip]) = {
-    val ajaxId = nextFuncName
-    val resultId = nextFuncName
     val tip = tips.get(special)
     val answers = (if (tip.isEmpty) Seq(("", "")) else Seq()) ++
       special.answers.zipWithIndex.map(t => (t._2.toString, t._1.localizedAnswer))
-    val selected = tip.map(_.answerId.toString) orElse Some("")
-    val showAjaxLoader = Call("toggleShowing", resultId, ajaxId)
 
-    def showResultImg(path: String) = {
-      JqJsCmds.Hide(ajaxId) &
-      JqJE.JqId(resultId) ~> JqJE.JqAttr("src", path) &
-      JqJsCmds.Show(resultId)
-    }
-    def success = showResultImg("/images/check.png")
-    def failure = showResultImg("/images/fail.png")
+    def beforeDeadline = {
+      val ajaxId = nextFuncName
+      val resultId = nextFuncName
+      val selected = tip.map(_.answerId.toString) orElse Some("")
+      val showAjaxLoader = Call("toggleShowing", resultId, ajaxId)
 
-    def saveTip(idStr: String) = {
-      try {
-        val id = idStr.toInt
-        if (id >= 0 && id < special.answers.length && DateTime.now < special.finalAnswerTime) {
-          if (SpecialTip.saveForUser(user, special, id)) {
-            success
+      def showResultImg(path: String) = {
+        JqJsCmds.Hide(ajaxId) &
+        JqJE.JqId(resultId) ~> JqJE.JqAttr("src", path) &
+        JqJsCmds.Show(resultId)
+      }
+      def success = showResultImg("/images/check.png")
+      def failure = showResultImg("/images/fail.png")
+
+      def saveTip(idStr: String) = {
+        try {
+          val id = idStr.toInt
+          if (id >= 0 && id < special.answers.length && DateTime.now < special.finalAnswerTime) {
+            if (SpecialTip.saveForUser(user, special, id)) {
+              success
+            } else {
+              failure
+            }
           } else {
             failure
           }
-        } else {
-          failure
+        } catch {
+          case _: NumberFormatException => failure
         }
-      } catch {
-        case _: NumberFormatException => failure
       }
+      ".special_select" #> SHtml.ajaxSelect(answers, selected, showAjaxLoader, saveTip _) &
+      "#special_button [src]" #> (if (tip.isEmpty) "/images/fail.png" else "/images/check.png") &
+      "#special_ajax_loader [id]" #> ajaxId &
+      "#special_button [id]" #> resultId
     }
 
-    ".special_title *" #> "%s (%d %s)".format(special.localizedTitle, special.points, S.?("points")) &
-    ".special_select" #> SHtml.ajaxSelect(answers, selected, showAjaxLoader, saveTip _) &
-    "#special_button [src]" #> (if (tip.isEmpty) "/images/fail.png" else "/images/check.png") &
-    "#special_ajax_loader [id]" #> ajaxId &
-    "#special_button [id]" #> resultId
+    def afterDeadline = {
+      val answer = tip.flatMap(tip =>
+        if (tip.answerId >= 0 && tip.answerId < special.answers.size) {
+          Some(special.answers(tip.answerId).localizedAnswer)
+        } else {
+          warn("Found answer with from id %d for special %s".format(special, tip.answerId))
+          None
+        }
+      ) getOrElse "-"
+      val specialResult = SpecialResult.forSpecial(special)
+      val inputClass = (specialResult, tip) match {
+        case (Full(r), Some(t)) if (r.answerId == t.answerId) => "special_select special_right"
+        case (Full(r), Some(t)) if (r.answerId != t.answerId) => "special_select special_wrong"
+        case _ => "special_select"
+      }
+      val answerHtml = <input disabled="disabled" class={ inputClass } value={ answer } />
+      ".special_answer *" #> answerHtml
+    }
+
+    ".special_title *" #> special.localizedTitle &
+    ".special_points *" #> special.points &
+    ".special_answer" #> (if (DateTime.now < special.finalAnswerTime) beforeDeadline else afterDeadline)
   }
 }
 
@@ -68,5 +92,6 @@ class TipOverview {
     val tips = SpecialTip.answersForUser(user, Special.all)
     ".special_question" #> Special.all.map(SpecialSnippet.html(user, _, tips))
   }
+
   def listGames = "#games" #> GameSnippet.render(Game.all)
 }

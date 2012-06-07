@@ -9,7 +9,16 @@ import org.scala_tools.time.Imports._
 import java.util.Date
 
 object DbTip extends DbTip with LongKeyedMetaMapper[DbTip] with MetaTip {
-  def updatePoints(result: Result): Boolean = false
+  def updatePoints(result: Result): Boolean = {
+    val all = findAll(By(_gameId, result.gameId))
+    val saved = for {
+      tip <- all
+      val points = Points.apply(tip.goalsHome, tip.goalsAway, result.goalsHome, result.goalsAway)
+      val x = tip._points(Full(points.points.toLong))
+    } yield tip.save()
+    return saved.foldLeft(true)(_ && _)
+  }
+
   def forUserAndGame(user: User, game: Game): Box[Tip] = find(By(_userId, user.id), By(_gameId, game.id))
   def forUserAndGames(user: User, games: Seq[Game]): Map[Game, Tip] = {
     val tips = findAll(By(_userId, user.id), ByList(_gameId, games.map(_.id)))
@@ -94,13 +103,13 @@ class DbTip extends Tip with LongKeyedMapper[DbTip] with IdPK {
   }
   protected object _goalsHome extends MappedInt(this)
   protected object _goalsAway extends MappedInt(this)
-  protected object _points extends MappedInt(this)
+  protected object _points extends MappedNullableLong(this)
   protected object _submissionTime extends MappedDateTime(this)
 
   def userId = _userId.is
   def gameId = _gameId.is
   def goalsHome = _goalsHome.is
   def goalsAway = _goalsAway.is
-  def points = None
+  def points = _points.is.flatMap(i => Points(i.toInt)).toOption
   def submissionTime = new DateTime(_submissionTime.is)
 }

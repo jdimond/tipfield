@@ -1,9 +1,11 @@
 package de.dimond.tippspiel.model
 
-import net.liftweb.common.Box
+import net.liftweb.common._
 import net.liftweb.http.S
 
 import org.scala_tools.time.Imports._
+
+import PersistanceConfiguration._
 
 object Special {
   def all = specials.values.toList.sortBy(_.id)
@@ -20,7 +22,6 @@ case class SpecialAnswer(answer: String) {
 }
 
 trait MetaSpecialTip {
-  def updatePoints(special: Special, finalAnswerId: Int): Boolean
   def saveForUser(user: User, special: Special, answerNumber: Int): Boolean
   def answerForUser(user: User, special: Special): Box[SpecialTip]
   def answersForUser(user: User, specials: Seq[Special]): Map[Special, SpecialTip]
@@ -31,4 +32,27 @@ trait SpecialTip {
   def special: Special
   def answerId: Int
   def submissionTime: DateTime
+}
+
+trait MetaSpecialResult {
+  def save(special: Special, answerId: Option[Int]): Box[SpecialResult] = {
+    val result = doSave(special, answerId)
+    result match {
+      case Full(result) => {
+        if (User.updatePointsAndRanking()) {
+          Full(result)
+        } else {
+          Empty
+        }
+      }
+      case empty => empty
+    }
+  }
+  protected def doSave(special: Special, answerId: Option[Int]): Box[SpecialResult]
+  def forSpecial(special: Special): Box[SpecialResult]
+}
+
+trait SpecialResult {
+  def special: Special
+  def answerId: Int
 }
