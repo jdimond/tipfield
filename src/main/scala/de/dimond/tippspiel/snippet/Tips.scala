@@ -169,7 +169,7 @@ object TipForm extends Logger {
 object GameSnippet extends Logger {
   import scala.xml.Text
   private def row(game: Game, tip: Option[Tip], result: Option[Result], user: Option[User]) = {
-    "#game_id *" #> game.id &
+    "#game_id *" #> SnippetHelpers.gameLinkHtml(game.id) &
     "#game_time *" #> DateHelpers.formatTime(game.date) &
     "#game_team_home *" #> SnippetHelpers.teamHtml(game.teamHome).reverse &
     "#game_team_away *" #> SnippetHelpers.teamHtml(game.teamAway) &

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Home</title>
+</head>
+<body class="lift:content_id=main">
+	<div id="main" class="lift:surround?with=default;at=content">
+		<div class="lift:Games.gameHeader row">
+			<div class="span9">
+				<div class="row">
+					<div class="span6">
+						<h2>
+							<br /> <span id="game_team_home" class="game_team"
+								style="text-align: right">Netherlands</span> : <span
+								id="game_team_away" class="game_team" style="text-align: left">Germany</span>
+						</h2>
+					</div>
+					<div class="span2">
+						<h2>
+							<br /> <small id="game_info">13.06.12 20:45</small>
+						</h2>
+					</div>
+					<div class="span1" style="text-align: right">
+						<h2>
+							<br /> <small id="game_result">1:2</small>
+						</h2>
+					</div>
+				</div>
+				<hr id="tips_hr" />
+			</div>
+			<div class="span9">
+				<table
+					class="lift:Games.gameRanking table table-striped table-bordered table-condensed">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th><span class="lift:loc.name">Name</span></th>
+							<th><span class="lift:loc.tip">Tip</span></th>
+							<th><span class="lift:loc.points">Points</span></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="ranking_entry">
+							<td class="ranking_rank">999</td>
+							<td class="ranking_name align-left"><img height="25px"
+								width="25px"
+								src="https://graph.facebook.com/jonathan.dimond/picture" /> <span
+								class="ranking_full_name">Jonathan Dimond</span>
+							<td id="game_tip">
+								<form id="game_form" class="form-horizontal">
+									<input type="text" name="guess_home" class="goal_input spinner" />
+									: <input type="text" name="guess_away"
+										class="goal_input spinner" /> <input type="hidden"
+										name="process" /> <input type="image" id="save_game_button"
+										src="/images/go.png" /> <img id="game_ajax_loader"
+										src="/images/ajax-loader.gif" style="display: none" />
+								</form>
+							</td>
+							<td class="ranking_points">192</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

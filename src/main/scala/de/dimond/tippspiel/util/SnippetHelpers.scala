@@ -10,9 +10,11 @@ object SnippetHelpers extends Logger {
   def teamHtml(ref: TeamReference) = ref.team match {
     case Left((str, id)) => Text(S.?(str).format(id))
     case Right(team) => {
-      Seq(<img src={"/images/flags/" + team.emblemUrl} />, Text(team.localizedName))
+      Seq(<img src={"/images/flags/" + team.emblemUrl} class="game_team_img" />, Text(team.localizedName))
     }
   }
+
+  def gameLinkHtml(gameId: Long) = <a href={"/games/" + gameId}>{gameId}</a>
 
   def die(text: String) = {
     warn(text)
