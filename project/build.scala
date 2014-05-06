@@ -1,9 +1,6 @@
 import sbt._
 import Keys._
-import com.github.siasia._
-import PluginKeys._
-import WebPlugin._
-import WebappPlugin._
+import com.earldouglas.xsbtwebplugin.WebPlugin
 
 object LiftProjectBuild extends Build {
   override lazy val settings = super.settings ++ buildSettings
@@ -13,14 +10,10 @@ object LiftProjectBuild extends Build {
     version      := "0.1-SNAPSHOT",
     scalaVersion := "2.9.1")
 
-  def customWebSettings = webSettings ++ Seq(
-    scanDirectories in Compile := Nil
-  )
-
   lazy val tippspiel = Project(
     id = "tippspiel",
     base = file("."),
-    settings = defaultSettings ++ customWebSettings)
+    settings = defaultSettings ++ WebPlugin.webSettings)
 
   lazy val defaultSettings = Defaults.defaultSettings ++ Seq(
     name := "tippspiel",
@@ -37,7 +30,9 @@ object LiftProjectBuild extends Build {
         "net.liftweb" %% "lift-webkit" % liftVersion % "compile",
         "net.liftweb" %% "lift-mapper" % liftVersion % "compile",
         "net.liftweb" %% "lift-json" % liftVersion % "compile",
-        "org.mortbay.jetty" % "jetty" % "6.1.22" % "container",
+        "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided",
+        "org.eclipse.jetty" % "jetty-webapp" % "9.1.0.v20131115" % "container",
+        "org.eclipse.jetty" % "jetty-plus"   % "9.1.0.v20131115" % "container",
         "ch.qos.logback" % "logback-classic" % "1.0.3" % "compile",
         "org.scalatest" %% "scalatest" % "1.6.1" % "test",
         "junit" % "junit" % "4.10" % "test",
