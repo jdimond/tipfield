@@ -11,6 +11,7 @@ import sitemap._
 import Loc._
 
 import de.dimond.tippspiel.model._
+import de.dimond.tippspiel.model.wc2014._
 import de.dimond.tippspiel.lib._
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 import de.dimond.tippspiel.util.Util

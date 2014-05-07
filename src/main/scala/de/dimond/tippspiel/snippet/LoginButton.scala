@@ -9,7 +9,6 @@ import net.liftweb.http.{SHtml, S}
 import Helpers._
 
 import de.dimond.tippspiel.model.User
-import de.dimond.tippspiel.model.GameData
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 import de.dimond.tippspiel.util.Util
 import de.dimond.tippspiel.Languages

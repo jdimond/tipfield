@@ -1,10 +1,58 @@
-package de.dimond.tippspiel.model
+package de.dimond.tippspiel.model.ec2012
+
+import de.dimond.tippspiel.model._
 
 import org.joda.time.{DateTime, DateTimeZone}
 
 import org.scala_tools.time.Imports._
 
 object GameData {
+
+  case class EuroTeam(name: String, emblemUrl: String, uefaCoefficient: Int) extends Team
+
+  case class EuroGroup(name: String, teams: Seq[EuroTeam], games: Seq[Game]) extends Group {
+    override def standings: Seq[Standing] = {
+      val unsorted = this.unsortedStandings
+      lazy val standingsTieBreaker = unsorted.groupBy(_.points).values.filter(_.size > 1).map(x => {
+          val teams = x.map(s => euroTeam(s.team)).toList
+          /* Check if we would run into endless recursion */
+          if (teams.size < this.teams.size) {
+            EuroGroup("", teams, games.filter(g => (g.teamAway.team, g.teamHome.team) match {
+                case (Right(a), Right(b)) => teams.contains(a) && teams.contains(b)
+                case _ => false
+              })).standings
+          } else {
+            Seq()
+          }
+        }).flatten
+
+      def euroTeam(t: Team) = t match {
+        case et: EuroTeam => et
+        case _ => throw new ClassCastException
+      }
+
+      unsorted.toList.sortWith((x, y) => {
+          (x.points > y.points) || (x.points == y.points && {
+              val x2 = standingsTieBreaker.filter(s => s.team == x.team).headOption
+              val y2 = standingsTieBreaker.filter(s => s.team == y.team).headOption
+              val tiebreaker = (x2, y2) match {
+                case (Some(x3), Some(y3)) => x3.compareTo(y3)
+                case _ => 0
+              }
+              (tiebreaker < 0) || (tiebreaker == 0 && {
+                  val diffX = x.goalsScored - x.goalsReceived
+                  val diffY = y.goalsScored - y.goalsReceived
+                  (diffX > diffY || (diffX == diffY && (
+                    (x.goalsScored > y.goalsScored) || (
+                      (x.goalsScored == y.goalsScored) &&
+                      euroTeam(x.team).uefaCoefficient > euroTeam(y.team).uefaCoefficient
+                    )
+                  )))
+              })
+          })
+      })
+    }
+  }
 
   def init(forTesting: Boolean = false) {
     def createDateTime(year: Int, month: Int, day: Int, hour: Int, minute: Int, timeZone: DateTimeZone) = {
@@ -15,28 +63,28 @@ object GameData {
       }
     }
     // Group A
-    val poland = Team("poland", "poland.png", 23806)
-    val greece = Team("greece", "greece.png", 29995)
-    val russia = Team("russia", "russia.png", 30671)
-    val czechRepublic = Team("czech_republic", "czech_republic.png", 26456)
+    val poland = EuroTeam("poland", "poland.png", 23806)
+    val greece = EuroTeam("greece", "greece.png", 29995)
+    val russia = EuroTeam("russia", "russia.png", 30671)
+    val czechRepublic = EuroTeam("czech_republic", "czech_republic.png", 26456)
 
     // Group B
-    val netherlands = Team("netherlands", "netherlands.png", 39660)
-    val denmark = Team("denmark", "denmark.png", 28105)
-    val germany = Team("germany", "germany.png", 37966)
-    val portugal = Team("portugal", "portugal.png", 29677)
+    val netherlands = EuroTeam("netherlands", "netherlands.png", 39660)
+    val denmark = EuroTeam("denmark", "denmark.png", 28105)
+    val germany = EuroTeam("germany", "germany.png", 37966)
+    val portugal = EuroTeam("portugal", "portugal.png", 29677)
 
     // Group C
-    val spain = Team("spain", "spain.png", 40016)
-    val italy = Team("italy", "italy.png", 32697)
-    val ireland = Team("ireland", "ireland.png", 25743)
-    val croatia = Team("croatia", "croatia.png", 31523)
+    val spain = EuroTeam("spain", "spain.png", 40016)
+    val italy = EuroTeam("italy", "italy.png", 32697)
+    val ireland = EuroTeam("ireland", "ireland.png", 25743)
+    val croatia = EuroTeam("croatia", "croatia.png", 31523)
 
     // Group D
-    val ukraine = Team("ukraine", "ukraine.png", 28029)
-    val sweden = Team("sweden", "sweden.png", 29235)
-    val france = Team("france", "france.png", 28848)
-    val england = Team("england", "england.png", 33063)
+    val ukraine = EuroTeam("ukraine", "ukraine.png", 28029)
+    val sweden = EuroTeam("sweden", "sweden.png", 29235)
+    val france = EuroTeam("france", "france.png", 28848)
+    val england = EuroTeam("england", "england.png", 33063)
 
     val utc3 = DateTimeZone.forOffsetHours(3)
     val utc2 = DateTimeZone.forOffsetHours(2)
@@ -78,14 +126,14 @@ object GameData {
     val game23 = Game(23, england.reference, ukraine.reference, createDateTime(2012, 6, 19, 21, 45, utc3), donetsk)
     val game24 = Game(24, sweden.reference, france.reference, createDateTime(2012, 6, 19, 21, 45, utc3), kiev)
 
-    val groupA = Group("A", Seq(poland, greece, russia, czechRepublic),
-                       Seq(game01, game02, game09, game10, game17, game18))
-    val groupB = Group("B", Seq(netherlands, denmark, germany, portugal),
-                       Seq(game03, game04, game11, game12, game19, game20))
-    val groupC = Group("C", Seq(spain, italy, ireland, croatia),
-                       Seq(game05, game06, game13, game14, game21, game22))
-    val groupD = Group("D", Seq(ukraine, sweden, france, england),
-                       Seq(game07, game08, game15, game16, game23, game24))
+    val groupA = EuroGroup("A", Seq(poland, greece, russia, czechRepublic),
+                           Seq(game01, game02, game09, game10, game17, game18))
+    val groupB = EuroGroup("B", Seq(netherlands, denmark, germany, portugal),
+                           Seq(game03, game04, game11, game12, game19, game20))
+    val groupC = EuroGroup("C", Seq(spain, italy, ireland, croatia),
+                           Seq(game05, game06, game13, game14, game21, game22))
+    val groupD = EuroGroup("D", Seq(ukraine, sweden, france, england),
+                           Seq(game07, game08, game15, game16, game23, game24))
 
     Group.init(Seq(groupA, groupB, groupC, groupD))
 

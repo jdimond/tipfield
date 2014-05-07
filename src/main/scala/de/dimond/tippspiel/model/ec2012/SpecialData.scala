@@ -1,4 +1,6 @@
-package de.dimond.tippspiel.model
+package de.dimond.tippspiel.model.ec2012
+
+import de.dimond.tippspiel.model._
 
 import org.joda.time.{DateTime, DateTimeZone}
 

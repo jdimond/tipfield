@@ -22,7 +22,9 @@ case class Location(location: String) {
   def localizedName = S.?(location)
 }
 
-case class Team(name: String, emblemUrl: String, uefaCoefficient: Int) {
+trait Team {
+  def name: String
+  def emblemUrl: String
   def reference = DirectTeamReference(this)
   def localizedName = S.?(name)
 }
@@ -49,12 +51,18 @@ case class GroupWinner(group: Group) extends TeamReference {
 case class GroupRunnerUp(group: Group) extends TeamReference {
   override def team = group.runnerUp.toRight(("runner_up_group_x", group.name))
 }
-case class GameWinner(game: Game) extends TeamReference {
-  val noTeam = Left(("winner_match_x", game.id.toString))
-  override def team = {
+
+trait GameOutcome {
+  def noTeam: Either[(String, String), Team]
+  def game: Game
+  private def getTeam(win: Boolean) = {
     Result.forGame(game) match {
       case Full(result) => {
-        val diff = result.goalsHome - result.goalsAway
+        val diff = if (win) {
+          result.goalsHome - result.goalsAway
+        } else {
+          result.goalsAway - result.goalsHome
+        }
         if (diff > 0) {
           game.teamHome.team
         } else if (diff < 0) {
@@ -66,6 +74,17 @@ case class GameWinner(game: Game) extends TeamReference {
       case _ => noTeam
     }
   }
+  def loser = getTeam(false)
+  def winner = getTeam(true)
+}
+
+case class GameWinner(game: Game) extends TeamReference with GameOutcome {
+  val noTeam = Left(("winner_match_x", game.id.toString))
+  override def team = winner
+}
+case class GameLoser(game: Game) extends TeamReference with GameOutcome {
+  val noTeam = Left(("loser_match_x", game.id.toString))
+  override def team = loser
 }
 
 object MatchDay {
