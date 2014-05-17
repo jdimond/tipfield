@@ -152,7 +152,7 @@ class Pools extends Logger {
         encJs(?("invitation_request_name")),
         encJs(?("invitation_request_description").format(user.fullName, currentPool.name)),
         toIds,
-        encJs(S.hostAndPath + "/pools/"),
+        encJs(S.hostAndPath),
         encJs(S.hostAndPath + "/images/logo.png"),
         ajaxCall._2.toJsCmd)
     } else {
