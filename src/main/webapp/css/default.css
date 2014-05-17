@@ -68,25 +68,25 @@ body {
 .wrapper {
   margin: 0 auto;
   text-align: left;
-  width: 700px;
+  width: 780px;
 }
 #logo {
   color: #FFFFFF;
   float: left;
-  margin: 25px 0 0;
+  margin: 15px 0 0;
   width: 342px;
 }
-#logo span, #logo a {
+#logo .image, #logo a {
   background: url("/images/logo.png") no-repeat scroll 0 0 transparent;
   border: medium none;
   display: block;
   height: 50px;
   width: 342px;
 }
-#logo img {
-  border: medium none;
-  display: block;
-  width: 0;
+#logo .logodesc {
+  font-family: Helvetica, "Nimbus Sans L", "Liberation Sans", Arial, sans-serif;
+  font-size: 19px;
+  color: #eee;
 }
 #pagebar {
   border-bottom: 1px solid #80AA20;
@@ -122,7 +122,11 @@ body {
 }
 .game_team {
   display: inline-block;
-  width: 45%;
+  width: 47%;
+  white-space: nowrap;
+  overflow: hidden;
+  vertical-align:middle;
+  text-overflow: ellipsis;
 }
 .game_team_img {
   margin: 0 5px;
