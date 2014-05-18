@@ -138,8 +138,9 @@ object TipForm extends Logger {
     }
 
     def renderHidden = "* *" #> {
-      <input disabled="disabled" class="input goal_input disabled_tip" value="?" /> ++ Text(" : ") ++
-      <input disabled="disabled" class="input goal_input disabled_tip" value="?" /> ++
+      val text = tip.map { _ => "?" } getOrElse "-"
+      <input disabled="disabled" class="input goal_input disabled_tip" value={ text } /> ++ Text(" : ") ++
+      <input disabled="disabled" class="input goal_input disabled_tip" value={ text } /> ++
       Text(" ") ++ <span class="badge">&nbsp;&nbsp;</span>
     }
 
@@ -149,16 +150,23 @@ object TipForm extends Logger {
 
     def renderLogin = "* *" #> (<a href="/facebook/authorize" class="btn btn-primary">Login</a>)
 
+    def addNotPlacedClass(seq: CssBindFunc) = {
+      tip match {
+        case Some(tip) => seq
+        case None => seq & "* [class+]" #> "not_placed"
+      }
+    }
+
     user match {
       case Some(user) => {
         if (DateTime.now < game.date) {
           if (isCurrentUser) {
             renderBeforeGame(user)
           } else {
-            renderHidden
+            addNotPlacedClass(renderHidden)
           }
         } else {
-          renderAfterGame(user)
+          addNotPlacedClass(renderAfterGame(user))
         }
       }
       case None => renderLogin

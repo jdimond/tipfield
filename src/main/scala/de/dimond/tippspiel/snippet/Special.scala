@@ -81,8 +81,15 @@ object SpecialSnippet extends Logger {
     }
 
     def hidden = {
-      val answerHtml = <input disabled="disabled" class="special_select" value="???" />
-      ".special_answer *" #> answerHtml
+      val text = tip map { _ => "???" } getOrElse "-"
+      ".special_answer *" #> <input disabled="disabled" class="special_select" value={ text } />
+    }
+
+    def addNotPlacedClass(seq: CssBindFunc) = {
+      tip match {
+        case Some(tip) => seq
+        case None => seq & "* [class+]" #> "not_placed"
+      }
     }
 
     ".special_title *" #> special.localizedTitle &
@@ -92,10 +99,10 @@ object SpecialSnippet extends Logger {
         if (isCurrentUser) {
           edit
         } else {
-          hidden
+          addNotPlacedClass(hidden)
         }
       } else {
-        noedit
+        addNotPlacedClass(noedit)
       }
     }
   }

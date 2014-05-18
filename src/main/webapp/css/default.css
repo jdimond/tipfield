@@ -198,6 +198,9 @@ body {
   text-align: center;
   display: inline-block;
 }
+.not_placed > * {
+  opacity: 0.3;
+}
 input[disabled] {
   cursor: text;
 }
@@ -229,6 +232,7 @@ input[disabled] {
 .special_select {
   margin-top: 7px;
   width: 130px;
+  text-align: center;
 }
 
 input.special_wrong {
