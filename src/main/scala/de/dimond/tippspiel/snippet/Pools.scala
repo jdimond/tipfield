@@ -83,7 +83,7 @@ class Pools extends Logger {
       "name=pool_name" #> SHtml.text(PoolName.is, PoolName(_), "placeholder" -> S.?("pool_name_placeholder")) &
       "name=pool_description" #> SHtml.textarea(PoolDescription.is, PoolDescription(_),
           "placeholder" -> S.?("pool_description_placeholder")) &
-      "name=allow_member_invite" #> SHtml.checkbox(AllowMemberInvite.is, AllowMemberInvite(_)) &
+      //"name=allow_member_invite" #> SHtml.checkbox(AllowMemberInvite.is, AllowMemberInvite(_)) &
       "name=process" #> SHtml.hidden(process)
     }
   }
