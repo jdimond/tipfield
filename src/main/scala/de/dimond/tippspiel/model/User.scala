@@ -175,6 +175,11 @@ trait User {
   def ranking: Option[Int]
   def ranking_=(r: Option[Int]): Unit
 
+  def numberOfTips: Int
+  def numberOfTips_=(n: Int): Unit
+  def numberOfSpecials: Int
+  def numberOfSpecials_=(n: Int): Unit
+
   def updatePoints() = {
     val tips = Tip.forUserAndGames(this, Game.all)
     val pointsTips = for {

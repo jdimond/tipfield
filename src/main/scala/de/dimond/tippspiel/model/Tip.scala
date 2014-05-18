@@ -10,6 +10,7 @@ trait MetaTip {
   def forUserAndGame(user: User, game: Game): Box[Tip]
   def forUserAndGames(user: User, games: Seq[Game]): Map[Game, Tip]
   def forUsersAndGame(userIds: Set[Long], game: Game): Map[Long, Tip]
+  def numberPlacedForUser(user: User): Int
   def saveForUserAndGame(user: User, game: Game, goalsHome: Int, goalsAway: Int): Boolean
   def statsForGame(game: Game): Option[TipStats]
 }
@@ -53,6 +54,24 @@ object TipStatsUpdater extends Actor with Logger {
         } else {
           info("Stats are up to date, not updating!")
         }
+      }
+    }
+  }
+
+  this.start
+}
+
+object TipCountManager extends Actor with Logger {
+  case class SetDirty(user: User)
+
+  def act = loop {
+    import PersistanceConfiguration._
+    react {
+      case SetDirty(user) => {
+        info("Updating tip counts for user %d".format(user.id))
+        user.numberOfTips = Tip.numberPlacedForUser(user)
+        user.numberOfSpecials = SpecialTip.numberPlacedForUser(user)
+        user.save()
       }
     }
   }

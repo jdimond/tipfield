@@ -124,6 +124,10 @@ class DbUser extends User with LongKeyedMapper[DbUser] with Logger {
   protected object _ranking extends MappedNullableLong(this) {
     override def dbIndexed_? = true
   }
+  protected object _numberOfTips extends MappedInt(this) {
+  }
+  protected object _numberOfSpecials extends MappedInt(this) {
+  }
 
   implicit def optionToDefault(o: Option[String]): String = {
     o match {
@@ -180,6 +184,15 @@ class DbUser extends User with LongKeyedMapper[DbUser] with Logger {
 
   override protected def points_=(p: Int) = {
     _points(p)
+  }
+
+  override def numberOfTips = _numberOfTips.is
+  override def numberOfTips_=(n: Int) = {
+    _numberOfTips(n)
+  }
+  override def numberOfSpecials = _numberOfSpecials.is
+  override def numberOfSpecials_=(n: Int) = {
+    _numberOfSpecials(n)
   }
 
   private var _facebookFriends: Option[Set[String]] = None

@@ -30,6 +30,10 @@ object DbTip extends DbTip with LongKeyedMetaMapper[DbTip] with MetaTip {
     gameTipSeq.toMap
   }
 
+  def numberPlacedForUser(user: User): Int = {
+    count(By(_userId, user.id)).toInt
+  }
+
   def forUsersAndGame(userIds: Set[Long], game: Game): Map[Long, Tip] = {
     val tips = findAll(ByList(_userId, userIds.toSeq), By(_gameId, game.id))
     tips.map(tip => (tip.userId, tip)).toMap
@@ -39,11 +43,16 @@ object DbTip extends DbTip with LongKeyedMetaMapper[DbTip] with MetaTip {
     if (DateTime.now > game.date) {
       return false
     }
-    val tip = find(By(_userId, user.id), By(_gameId, game.id)) openOr DbTip.create._userId(user.id)._gameId(game.id)
+    val tipBox = find(By(_userId, user.id), By(_gameId, game.id))
+    val tip = tipBox openOr DbTip.create._userId(user.id)._gameId(game.id)
     tip._goalsHome(goalsHome)
     tip._goalsAway(goalsAway)
     tip._submissionTime(new Date())
-    return tip.save()
+    val result = tip.save()
+    if (result && tipBox.isEmpty) {
+      TipCountManager ! TipCountManager.SetDirty(user)
+    }
+    return result
   }
 
   def statsForGame(game: Game): Option[TipStats] = {

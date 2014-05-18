@@ -28,7 +28,14 @@ object DbSpecialTip extends DbSpecialTip with LongKeyedMetaMapper[DbSpecialTip] 
     val specialAnswer = box openOr DbSpecialTip.create._userId(user.id)._specialId(special.id)
     specialAnswer._answerId(answerId)
     specialAnswer._submissionTime(new Date())
-    specialAnswer.save()
+    val result = specialAnswer.save()
+    if (result && box.isEmpty) {
+      TipCountManager ! TipCountManager.SetDirty(user)
+    }
+    return result
+  }
+  def numberPlacedForUser(user: User): Int = {
+    count(By(_userId, user.id)).toInt
   }
 }
 

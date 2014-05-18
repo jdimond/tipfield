@@ -18,7 +18,8 @@ object UserRanking {
       ".ranking_rank *" #> rank.is &
       ".ranking_full_name *" #> <a href={ "/tips/%s".format(user.fbId) }>{ user.fullName }</a> &
       "img [src]" #> user.profilePictureUrl &
-      ".ranking_points *" #> user.points
+      ".ranking_points *" #> user.points &
+      ".ranking_placed *" #> (user.numberOfTips + user.numberOfSpecials)
     }}}
   }
 }

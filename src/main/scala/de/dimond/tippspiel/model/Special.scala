@@ -25,6 +25,7 @@ trait MetaSpecialTip {
   def saveForUser(user: User, special: Special, answerNumber: Int): Boolean
   def answerForUser(user: User, special: Special): Box[SpecialTip]
   def answersForUser(user: User, specials: Seq[Special]): Map[Special, SpecialTip]
+  def numberPlacedForUser(user: User): Int
 }
 
 trait SpecialTip {
