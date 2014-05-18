@@ -13,6 +13,7 @@ trait MetaTip {
   def numberPlacedForUser(user: User): Int
   def saveForUserAndGame(user: User, game: Game, goalsHome: Int, goalsAway: Int): Boolean
   def statsForGame(game: Game): Option[TipStats]
+  def totalCount: Long
 }
 
 trait TipStats {

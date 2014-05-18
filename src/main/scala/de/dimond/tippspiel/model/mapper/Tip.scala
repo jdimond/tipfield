@@ -99,6 +99,8 @@ object DbTip extends DbTip with LongKeyedMetaMapper[DbTip] with MetaTip {
     }
     Some(gameStats)
   }
+
+  override def totalCount = count
 }
 
 class DbTip extends Tip with LongKeyedMapper[DbTip] with IdPK {

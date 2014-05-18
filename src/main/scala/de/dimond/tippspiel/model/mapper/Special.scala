@@ -37,6 +37,7 @@ object DbSpecialTip extends DbSpecialTip with LongKeyedMetaMapper[DbSpecialTip] 
   def numberPlacedForUser(user: User): Int = {
     count(By(_userId, user.id)).toInt
   }
+  def totalCount = count
 }
 
 class DbSpecialTip extends SpecialTip with LongKeyedMapper[DbSpecialTip] with IdPK {

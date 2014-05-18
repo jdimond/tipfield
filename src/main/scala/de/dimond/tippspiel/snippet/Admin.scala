@@ -137,4 +137,15 @@ class Admin {
       "name=process" #> SHtml.hidden(recalculate)
     }
   }
+
+  def stats = {
+    val registeredUsers = User.totalCount
+    val totalTips = Tip.totalCount
+    val totalSpecials = SpecialTip.totalCount
+    "#registered_users" #> Text(registeredUsers.toString) &
+    "#placed_tips" #> Text(totalTips.toString) &
+    "#placed_specials" #> Text(totalSpecials.toString) &
+    "#tips_per_user" #> Text((1.0*totalTips / registeredUsers).toString) &
+    "#specials_per_user" #> Text((1.0*totalSpecials / registeredUsers).toString)
+  }
 }

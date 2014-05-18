@@ -26,6 +26,7 @@ trait MetaSpecialTip {
   def answerForUser(user: User, special: Special): Box[SpecialTip]
   def answersForUser(user: User, specials: Seq[Special]): Map[Special, SpecialTip]
   def numberPlacedForUser(user: User): Int
+  def totalCount: Long
 }
 
 trait SpecialTip {

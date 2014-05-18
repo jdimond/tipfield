@@ -23,6 +23,8 @@ object DbUser extends DbUser with LongKeyedMetaMapper[DbUser] with MetaUser[DbUs
   override def findAll(ids: Set[Long]): Seq[User] = findAll(ByList(_id, ids.toSeq))
   override def userRanking(count: Int): Seq[(Rank, User)] = Seq()
 
+  override def totalCount: Long = count
+
   override def afterCreate = updateUserIdForFriends _ :: super.afterCreate
 
   override def save(user: DbUser) = {
