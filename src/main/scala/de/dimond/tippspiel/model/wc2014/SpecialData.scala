@@ -76,6 +76,14 @@ object SpecialData {
 
     val utc3 = DateTimeZone.forOffsetHours(-3)
     val wcStartDate = new DateTime(2014, 6, 12, 17, 00, utc3)
+    val groupAStartDate = wcStartDate;
+    val groupBStartDate = new DateTime(2014, 6, 13, 16, 00, utc3)
+    val groupCStartDate = new DateTime(2014, 6, 14, 13, 00, utc3)
+    val groupDStartDate = new DateTime(2014, 6, 14, 16, 00, utc3)
+    val groupEStartDate = new DateTime(2014, 6, 15, 13, 00, utc3)
+    val groupFStartDate = new DateTime(2014, 6, 15, 19, 00, utc3)
+    val groupGStartDate = new DateTime(2014, 6, 16, 13, 00, utc3)
+    val groupHStartDate = new DateTime(2014, 6, 17, 13, 00, utc3)
 
     if (forTesting) {
       val winnerSpecial = Special(1, "wc_winner_title", 10, teamList, DateTime.now)
@@ -91,14 +99,14 @@ object SpecialData {
     } else {
       val winnerSpecial = Special(1, "wc_winner_title", 10, teamList, wcStartDate)
       val topScorer = Special(2, "top_scorer_title", 3, teamList, wcStartDate)
-      val groupA = Special(3, "special_groupa_title", 3, groupAList, wcStartDate)
-      val groupB = Special(4, "special_groupb_title", 3, groupBList, wcStartDate)
-      val groupC = Special(5, "special_groupc_title", 3, groupCList, wcStartDate)
-      val groupD = Special(6, "special_groupd_title", 3, groupDList, wcStartDate)
-      val groupE = Special(7, "special_groupe_title", 3, groupEList, wcStartDate)
-      val groupF = Special(8, "special_groupf_title", 3, groupFList, wcStartDate)
-      val groupG = Special(9, "special_groupg_title", 3, groupGList, wcStartDate)
-      val groupH = Special(10, "special_grouph_title", 3, groupHList, wcStartDate)
+      val groupA = Special(3, "special_groupa_title", 3, groupAList, groupAStartDate)
+      val groupB = Special(4, "special_groupb_title", 3, groupBList, groupBStartDate)
+      val groupC = Special(5, "special_groupc_title", 3, groupCList, groupCStartDate)
+      val groupD = Special(6, "special_groupd_title", 3, groupDList, groupDStartDate)
+      val groupE = Special(7, "special_groupe_title", 3, groupEList, groupEStartDate)
+      val groupF = Special(8, "special_groupf_title", 3, groupFList, groupFStartDate)
+      val groupG = Special(9, "special_groupg_title", 3, groupGList, groupGStartDate)
+      val groupH = Special(10, "special_grouph_title", 3, groupHList, groupHStartDate)
     }
 
     //val secondSpecial = Special(2, "euro_runnerup_title", 5, teamList, wcStartDate)
