@@ -33,10 +33,12 @@ class Pools extends Logger {
 
   def linkForPool(pool: Pool) = pool match {
     case FacebookPool => "/pools"
+    case AdminPool => "/pools/admin"
     case p => "/pools/%d".format(p.id)
   }
 
-  def pools = Seq(FacebookPool) ++ Pool.allForUser(user).toSeq.sortBy(_.name)
+  def pools = Seq(FacebookPool) ++ Pool.allForUser(user).toSeq.sortBy(_.name) ++
+              (if (user.isAdmin) Seq(AdminPool) else Seq())
 
   val currentPool = S.param("poolid") match {
     case Full(Long(id)) => {
@@ -48,14 +50,21 @@ class Pools extends Logger {
         case _ => S.redirectTo(linkForPool(FacebookPool))
       }
     }
+    case Full("admin") => AdminPool
     case Full(_) => S.redirectTo(linkForPool(FacebookPool))
     case _ => FacebookPool
   }
 
-  lazy val poolUsers = User.findAll(currentPool.users)
+  lazy val poolUsers = currentPool match {
+    case AdminPool => {
+      if (user.isAdmin) User.findAll() else Seq()
+    }
+    case _ => User.findAll(currentPool.users)
+  }
 
   def cometGuard(in: scala.xml.NodeSeq) = currentPool match {
     case FacebookPool => scala.xml.NodeSeq.Empty
+    case AdminPool => scala.xml.NodeSeq.Empty
     case p: Pool => in
   }
 
@@ -110,6 +119,7 @@ class Pools extends Logger {
                 debug("Invited to facebook pool: %s".format(currentPool))
                 success
               }
+              case AdminPool => throw new RuntimeException("Not supported")
               case realPool => {
                 strIds.map(realPool.inviteUser(_, Some(user)))
                 debug("Added following invites: %s".format(strIds))
@@ -195,6 +205,9 @@ class Pools extends Logger {
   def leavePoolButton = {
     currentPool match {
       case FacebookPool => {
+        "#leave_pool" #> ""
+      }
+      case AdminPool => {
         "#leave_pool" #> ""
       }
       case p: Pool => {

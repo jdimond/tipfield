@@ -62,6 +62,24 @@ case object FacebookPool extends Pool {
   def updateDescription(description: String) = throw new RuntimeException("Not supported")
 }
 
+case object AdminPool extends Pool {
+  def id = -1
+  def name = ?("all_users")
+  def description = ""
+  def users = Set()
+  def adminId = 0
+  def removeUser(user: User) = throw new RuntimeException("Not supported")
+  def addUser(user: User) = throw new RuntimeException("Not supported")
+
+  def invitationLinkForUser(user: User) = None
+  def userHasLeftGroup(userId: Long) = Full(false)
+  def inviteUser(facebookId: String, fromUser: Option[User]) = throw new RuntimeException("Not supported")
+  def userIsAllowedToInvite(user: User) = false
+  def userIsInvited(facebookId: String) = false
+  def ignoreInvitations(user: User) = throw new RuntimeException("Not supported")
+  def updateDescription(description: String) = throw new RuntimeException("Not supported")
+}
+
 trait MetaFacebookRequests {
   def saveRequestForUser(fromUser: User, toFbId: String, requestId: String, poolId: Long): Boolean
   def deleteRequest(fbId: String, requestId: String): Boolean
