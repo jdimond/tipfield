@@ -91,6 +91,8 @@ class Boot extends Bootable with Logger {
          RewriteResponse("invite" :: Nil, Map("inviteid" -> inviteId))
       case RewriteRequest(ParsePath(List("tips", fbuserid),_,_,_),_,_) =>
          RewriteResponse("tips" :: Nil, Map("fbuserid" -> fbuserid))
+      case RewriteRequest(ParsePath(List("games", gameId, "admin"),_,_,_),_,_) =>
+        RewriteResponse("games" :: Nil, Map("gameId" -> gameId, "showAdmin" -> "true"))
       case RewriteRequest(ParsePath(List("games", gameId),_,_,_),_,_) =>
          RewriteResponse("games" :: Nil, Map("gameId" -> gameId))
     }

@@ -22,10 +22,15 @@ class Games {
     case _ => S.redirectTo("/")
   }
 
+  val users = (S.param("showAdmin"), User.currentUser) match {
+    case (Full("true"), Full(user)) if user.isAdmin => User.findAll()
+    case _ => User.findAll(FacebookPool.users)
+  }
+
   val result = Result.forGame(game).toOption
 
   def gameRanking = {
-    val ranking = User.rankUsers(User.findAll(FacebookPool.users))
+    val ranking = User.rankUsers(users)
     ".ranking_entry" #> {
       ranking.map {
         case (rank, user) => {
