@@ -9,7 +9,7 @@ import de.dimond.tippspiel.model.PersistanceConfiguration._
 import net.liftweb.http.S
 
 object Game {
-  def all = games.values.toList.sortWith((e1, e2) => (e1.date compareTo e2.date) < 0 || e1.id < e2.id)
+  def all = games.values.toList.sortBy(g => (g.date, g.id))
   def forId(gameId: Long) = games.get(gameId)
   private var games: Map[Long, Game] = Map()
 }
