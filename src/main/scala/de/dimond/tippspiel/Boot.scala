@@ -42,6 +42,7 @@ class Boot extends Bootable with Logger {
       Menu(Loc("Admin", List("admin") -> false, S.?("admin"), ifAdmin)),
       Menu.i("index") / "index" >> Hidden,
       Menu.i("games") / "games" >> Hidden,
+      Menu.i("special") / "special" >> Hidden,
       Menu.i("invite") / "invite" >> Hidden,
       Menu.i("login") / "login" >> Hidden,
       Menu.i("aboutus") / "aboutus" >> Hidden,
@@ -95,6 +96,10 @@ class Boot extends Bootable with Logger {
         RewriteResponse("games" :: Nil, Map("gameId" -> gameId, "showAdmin" -> "true"))
       case RewriteRequest(ParsePath(List("games", gameId),_,_,_),_,_) =>
          RewriteResponse("games" :: Nil, Map("gameId" -> gameId))
+      case RewriteRequest(ParsePath(List("special", specialId),_,_,_),_,_) =>
+        RewriteResponse("special" :: Nil, Map("specialId" -> specialId))
+      case RewriteRequest(ParsePath(List("special", specialId, "admin"),_,_,_),_,_) =>
+        RewriteResponse("special" :: Nil, Map("specialId" -> specialId, "showAdmin" -> "true"))
     }
 
     // Make sure ExtendedSession is used

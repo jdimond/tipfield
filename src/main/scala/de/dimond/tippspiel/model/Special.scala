@@ -9,7 +9,7 @@ import PersistanceConfiguration._
 
 object Special {
   def all = specials.values.toList.sortBy(_.id)
-  def forId(id: Long) = specials(id)
+  def forId(id: Long) = specials.get(id)
   private var specials: Map[Long, Special] = Map()
 }
 

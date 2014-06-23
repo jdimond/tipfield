@@ -19,7 +19,7 @@ import de.dimond.tippspiel.model._
 import de.dimond.tippspiel.model.PersistanceConfiguration._
 
 object SpecialSnippet extends Logger {
-  def html(user: User, special: Special, tips: Map[Special, SpecialTip]) = {
+  def selectHtml(user: User, special: Special, tips: Map[Special, SpecialTip]) = {
     val tip = tips.get(special)
     val answers = (if (tip.isEmpty) Seq(("", "")) else Seq()) ++
       special.answers.zipWithIndex.map(t => (t._2.toString, t._1.localizedAnswer))
@@ -92,19 +92,20 @@ object SpecialSnippet extends Logger {
       }
     }
 
-    ".special_title *" #> special.localizedTitle &
-    ".special_points *" #> special.points &
-    ".special_answer" #> {
-      if (DateTime.now < special.finalAnswerTime) {
-        if (isCurrentUser) {
-          edit
-        } else {
-          addNotPlacedClass(hidden)
-        }
+    if (DateTime.now < special.finalAnswerTime) {
+      if (isCurrentUser) {
+        edit
       } else {
-        addNotPlacedClass(noedit)
+        addNotPlacedClass(hidden)
       }
+    } else {
+      addNotPlacedClass(noedit)
     }
+  }
+  def rowHtml(user: User, special: Special, tips: Map[Special, SpecialTip]) = {
+    ".special_title *" #> <a href={ "/special/%s".format(special.id) }>{ special.localizedTitle }</a> &
+    ".special_points *" #> special.points &
+    ".special_answer" #> SpecialSnippet.selectHtml(user, special, tips)
   }
 }
 
@@ -129,7 +130,7 @@ class TipOverview {
 
   def listSpecials = {
     val tips = SpecialTip.answersForUser(user, Special.all)
-    ".special_question" #> Special.all.map(SpecialSnippet.html(user, _, tips))
+    ".special_question" #> Special.all.map(SpecialSnippet.rowHtml(user, _, tips))
   }
 
   def listGames = "#games" #> GameSnippet.render(Game.all, Some(user))

@@ -54,7 +54,7 @@ class DbSpecialTip extends SpecialTip with LongKeyedMapper[DbSpecialTip] with Id
   protected object _points extends MappedInt(this)
 
   override def userId = _userId.is
-  override def special = Special.forId(_specialId.is)
+  override def special = Special.forId(_specialId.is).get
   override def answerId = _answerId.is
   override def submissionTime = new DateTime(_submissionTime.is)
 }
@@ -115,6 +115,6 @@ class DbSpecialResult extends SpecialResult with LongKeyedMapper[DbSpecialResult
   }
   protected object _answerId extends MappedInt(this)
 
-  override def special = Special.forId(_specialId.is)
+  override def special = Special.forId(_specialId.is).get
   override def answerId = _answerId.is
 }
