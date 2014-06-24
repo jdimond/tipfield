@@ -221,6 +221,10 @@ class DbUser extends User with LongKeyedMapper[DbUser] with Logger {
     friends.map(_.friendUserId.is).toSet
   }
 
+  override def poolFriends: Set[Long] = {
+    val pools = Pool.allForUser(this)
+    friends ++ pools.map(_.users).flatten.toSet
+  }
 }
 
 object DbFriends extends DbFriends with LongKeyedMetaMapper[DbFriends]

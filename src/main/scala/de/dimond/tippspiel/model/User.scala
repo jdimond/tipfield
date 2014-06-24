@@ -170,6 +170,7 @@ trait User {
   def facebookFriends_=(ids: Set[String]): Unit
 
   def friends: Set[Long]
+  def poolFriends: Set[Long]
 
   def points: Int
   protected def points_=(p: Int): Unit

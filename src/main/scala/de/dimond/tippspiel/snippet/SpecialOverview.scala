@@ -25,7 +25,8 @@ class SpecialOverview {
 
   val users = (S.param("showAdmin"), User.currentUser) match {
     case (Full("true"), Full(user)) if user.isAdmin => User.findAll()
-    case _ => User.findAll(FacebookPool.users)
+    case (_, Full(user)) => User.findAll(user.poolFriends + user.id)
+    case _ => Seq()
   }
 
   def specialRanking = {
